@@ -275,20 +275,19 @@ app.post("/searchByTag", function(req, res) {
 });
 
 /*call example{
-	"id" : your id,
-	"value" : "anime,jpop"//tags comma separated
+  "id" : your id,
+  "fields" : "field_to_update"
+	"value" : "value_to_update"
 }*/
 app.post("/updateDocument", function(req, res) {  
-  //const query = {};
-  const {id,value} = req.body;
+  const update = {};  
+  update[req.body.field] = req.body.value
   client.update({
     index: 'song',
     type: 'music',
-    id: id,
+    id: req.body.id,
     body: {
-      doc: {
-        tags: value
-      }
+      doc: update
     }
   }).then(function(resp) {
     console.log(resp);
