@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 app.use(express.static('public'));
 app.use(bodyParser.json());
 var d = new Date();
+const user = {};
 
 var client = new elasticsearch.Client({
   hosts: [ 'http://localhost:9200']
@@ -81,7 +82,7 @@ function getAccessToken(oAuth2Client, callback) {
  */
 function listFiles(auth) {
   const drive = google.drive({version: 'v3', auth});    
-  client.ping({
+  /*client.ping({
       requestTimeout: 30000,
   }, function(error) {
       if (error) {
@@ -89,6 +90,16 @@ function listFiles(auth) {
       } else {
           console.log('Everything is ok');
       }
+  });*/
+
+  //getting some user data
+  drive.about.get({
+    fields: 'user'
+  },(error, result) => {
+    if (error) return console.log('The API returned an error: ' + error);
+    console.log(result.data.user);
+    user.name = result.data.user.displayName;
+    user.email = result.data.user.emailAddress;
   });
 
   /*client.indices.create({
