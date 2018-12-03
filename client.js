@@ -1,4 +1,5 @@
 const fs = require('fs');
+const readline = require('readline');
 const {google} = require('googleapis');
 const NodeID3 = require('node-id3');
 const elasticsearch = require('elasticsearch');
@@ -110,7 +111,7 @@ function getNextFile(drive,nextPageToken)
   if (typeof(nextPageToken) !== "undefined")
   {
     drive.files.list({
-      pageSize: 100,
+      pageSize: 10,
       fields: 'nextPageToken, files(id,name,webContentLink)',
       q: 'mimeType="audio/mp3"',
       corpus: 'user',
@@ -153,7 +154,7 @@ function processFile(drive,files,index)
             //let tags = NodeID3.read(tempPath + file.name);
             NodeID3.read(tempPath + file.name, function(err, tags) { 
               console.log(tags);
-              /*client.index({
+              client.index({
                 index: 'song',
                 type: 'music',
                 body: {
@@ -175,7 +176,7 @@ function processFile(drive,files,index)
                 //console.log(resp);
                 console.log('downloaded ' + file.name);
                 processFile(drive,files,index + 1)
-              });*/
+              });
             });
         })
         .on('UnhandledPromiseRejection', function(reason, promise) {
@@ -211,10 +212,15 @@ app.post("/listSong", function(req, res) {
   });
 });
 
+/*body call example
+{
+	"field" : "title",//field to search 
+	"query": "physic"//value to search
+}*/
 app.post("/searchSong", function(req, res) {
   const query = {};
   console.log(req.body);
-  query[req.body.field] = req.body.data;
+  query[req.body.field] = req.body.query;
   //const { name, artist, genre, album } = req.body;
   /*if (req.body.name) query.title = req.body.name;
   if (req.body.artist) query.artist = req.body.artist;
@@ -239,6 +245,57 @@ app.post("/searchSong", function(req, res) {
   });
   //console.log(client.search);
   //res.status(200).send(query);
+});
+
+/*body call example
+{
+	"field" : "tags",//always tags o field where tags are saved
+	"query" : "pop AND anime" //tags to seach with AND separated
+}*/
+app.post("/searchByTag", function(req, res) {  
+  const query = {};
+  //query = req.body.data;
+  query.default_field = req.body.field;
+  query.query = req.body.query;
+  console.log(query);
+  client.search({
+    index: 'song',
+    type: 'music',
+    body: {
+      query: {
+        query_string: query
+      }
+  }
+  }).then(function(resp) {
+    console.log(resp);
+    res.status(200).send(resp.hits);
+  }, function(err) {
+    res.status(404).send(err.message);
+  });
+});
+
+/*call example{
+	"id" : your id,
+	"value" : "anime,jpop"//tags comma separated
+}*/
+app.post("/updateDocument", function(req, res) {  
+  //const query = {};
+  const {id,value} = req.body;
+  client.update({
+    index: 'song',
+    type: 'music',
+    id: id,
+    body: {
+      doc: {
+        tags: value
+      }
+    }
+  }).then(function(resp) {
+    console.log(resp);
+    res.status(200).send(resp);
+  }, function(err) {
+    res.status(404).send(err.message);
+  });
 });
 
 var listener = app.listen(10000, function() {
