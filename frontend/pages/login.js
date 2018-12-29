@@ -1,21 +1,21 @@
 import React from 'react';
 import GooglePicker from 'react-google-picker';
+import getConfig from 'next/config';
 
-var developerKey = 'AIzaSyD4HA1iofTL6QS2dxi444myJWvzyp-ex9Y';
-var clientId =
-  '582939706884-6p046rp6aaetu126sa6i9luro0ihsmt6.apps.googleusercontent.com';
+const { publicRuntimeConfig } = getConfig();
+
 var scope = 'https://www.googleapis.com/auth/drive.readonly';
 
 class Home extends React.Component {
   componentDidMount() {
     console.log('hit api');
-		fetch('http://localhost:3001/ggwp', {
-			credentials: 'include'
-		})
-			.then(res => {
-				return res.json();
-			})
-			.then(a => console.log(a));
+    fetch('http://localhost:3001/ggwp', {
+      credentials: 'include'
+    })
+      .then(res => {
+        return res.json();
+      })
+      .then(a => console.log(a));
   }
   onCallback = data => {
     if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
@@ -33,7 +33,7 @@ class Home extends React.Component {
     return (
       <div>
         <GooglePicker
-          clientId={clientId}
+          clientId={publicRuntimeConfig.GOOGLE_CLIENT_ID}
           scope={[scope]}
           onAuthenticate={token => console.log('oauth token:', token)}
           onAuthFailed={data => console.log('on auth failed:', data)}
@@ -47,7 +47,7 @@ class Home extends React.Component {
             const picker = new window.google.picker.PickerBuilder()
               .addView(docsView)
               .setOAuthToken(oauthToken)
-              .setDeveloperKey(developerKey)
+              .setDeveloperKey(publicRuntimeConfig.GOOGLE_DEVELOPER_KEY)
               .setCallback(this.onCallback);
 
             picker.build().setVisible(true);
