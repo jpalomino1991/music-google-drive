@@ -1,0 +1,10 @@
+projects:
+  music-drive:
+    schemaPath: "src/schema.graphql"
+    extensions:
+      endpoints:
+        default: ${env:BACKEND_ENDPOINT}
+  prisma:
+    schemaPath: "src/generated/prisma.graphql"
+    extensions:
+      prisma: prisma.yml

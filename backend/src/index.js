@@ -1,0 +1,35 @@
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+const createServer = require('./createServer');
+const db = require('./db');
+const auth = require('./auth');
+
+const server = createServer();
+
+server.express.use(cookieParser());
+
+server.express.use(async (req, res, next) => {
+  const { token } = req.cookies;
+  if (token) {
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = userId;
+  }
+  next();
+});
+
+auth(server);
+
+server.start(
+  {
+    port: process.env.PORT,
+    cors: {
+      credentials: true,
+      origin: process.env.FRONTEND_URL
+    }
+  },
+  ({ port }) => {
+    console.log(`Server running on port ${port}`);
+  }
+);

@@ -1,0 +1,10 @@
+type Query {
+  me: User
+}
+
+type User {
+  id: ID!
+  providerId: String!
+  displayName: String!
+  picture: String!
+}
