@@ -1,7 +1,15 @@
 # source: https://us1.prisma.sh/music-drive/music-drive/dev
-# timestamp: Fri Dec 28 2018 20:51:20 GMT-0500 (-05)
+# timestamp: Sun Dec 30 2018 18:51:24 GMT-0500 (-05)
 
 type AggregateGoogleInfo {
+  count: Int!
+}
+
+type AggregateMusicFolder {
+  count: Int!
+}
+
+type AggregateState {
   count: Int!
 }
 
@@ -14,7 +22,10 @@ type BatchPayload {
   count: Long!
 }
 
+scalar DateTime
+
 type GoogleInfo {
+  user: User
   etag: String
   familyName: String
   givenName: String
@@ -46,10 +57,23 @@ input GoogleInfoCreateInput {
   language: String
   isPlusUser: Boolean
   verified: Boolean
+  user: UserCreateOneWithoutGoogleInfoInput
 }
 
-input GoogleInfoCreateOneInput {
-  create: GoogleInfoCreateInput
+input GoogleInfoCreateOneWithoutUserInput {
+  create: GoogleInfoCreateWithoutUserInput
+}
+
+input GoogleInfoCreateWithoutUserInput {
+  etag: String
+  familyName: String
+  givenName: String
+  kind: String
+  objectType: String
+  url: String
+  language: String
+  isPlusUser: Boolean
+  verified: Boolean
 }
 
 """An edge in a connection."""
@@ -139,18 +163,6 @@ input GoogleInfoSubscriptionWhereInput {
   node: GoogleInfoWhereInput
 }
 
-input GoogleInfoUpdateDataInput {
-  etag: String
-  familyName: String
-  givenName: String
-  kind: String
-  objectType: String
-  url: String
-  language: String
-  isPlusUser: Boolean
-  verified: Boolean
-}
-
 input GoogleInfoUpdateManyMutationInput {
   etag: String
   familyName: String
@@ -163,15 +175,27 @@ input GoogleInfoUpdateManyMutationInput {
   verified: Boolean
 }
 
-input GoogleInfoUpdateOneRequiredInput {
-  create: GoogleInfoCreateInput
-  update: GoogleInfoUpdateDataInput
-  upsert: GoogleInfoUpsertNestedInput
+input GoogleInfoUpdateOneRequiredWithoutUserInput {
+  create: GoogleInfoCreateWithoutUserInput
+  update: GoogleInfoUpdateWithoutUserDataInput
+  upsert: GoogleInfoUpsertWithoutUserInput
 }
 
-input GoogleInfoUpsertNestedInput {
-  update: GoogleInfoUpdateDataInput!
-  create: GoogleInfoCreateInput!
+input GoogleInfoUpdateWithoutUserDataInput {
+  etag: String
+  familyName: String
+  givenName: String
+  kind: String
+  objectType: String
+  url: String
+  language: String
+  isPlusUser: Boolean
+  verified: Boolean
+}
+
+input GoogleInfoUpsertWithoutUserInput {
+  update: GoogleInfoUpdateWithoutUserDataInput!
+  create: GoogleInfoCreateWithoutUserInput!
 }
 
 input GoogleInfoWhereInput {
@@ -471,7 +495,11 @@ input GoogleInfoWhereInput {
 
   """All values that are not equal to given value."""
   verified_not: Boolean
+  user: UserWhereInput
 }
+
+"""Raw JSON value"""
+scalar Json
 
 """
 The `Long` scalar type represents non-fractional signed whole numeric values.
@@ -479,16 +507,400 @@ Long can represent values between -(2^63) and 2^63 - 1.
 """
 scalar Long
 
+type MusicFolder implements Node {
+  id: ID!
+  folderId: String!
+  name: String!
+  iconUrl: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  states(where: StateWhereInput, orderBy: StateOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [State!]
+  user: User!
+}
+
+"""A connection to a list of items."""
+type MusicFolderConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [MusicFolderEdge]!
+  aggregate: AggregateMusicFolder!
+}
+
+input MusicFolderCreateInput {
+  folderId: String!
+  name: String!
+  iconUrl: String
+  states: StateCreateManyWithoutFolderInput
+  user: UserCreateOneInput!
+}
+
+input MusicFolderCreateOneWithoutStatesInput {
+  create: MusicFolderCreateWithoutStatesInput
+  connect: MusicFolderWhereUniqueInput
+}
+
+input MusicFolderCreateWithoutStatesInput {
+  folderId: String!
+  name: String!
+  iconUrl: String
+  user: UserCreateOneInput!
+}
+
+"""An edge in a connection."""
+type MusicFolderEdge {
+  """The item at the end of the edge."""
+  node: MusicFolder!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum MusicFolderOrderByInput {
+  id_ASC
+  id_DESC
+  folderId_ASC
+  folderId_DESC
+  name_ASC
+  name_DESC
+  iconUrl_ASC
+  iconUrl_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+}
+
+type MusicFolderPreviousValues {
+  id: ID!
+  folderId: String!
+  name: String!
+  iconUrl: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type MusicFolderSubscriptionPayload {
+  mutation: MutationType!
+  node: MusicFolder
+  updatedFields: [String!]
+  previousValues: MusicFolderPreviousValues
+}
+
+input MusicFolderSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [MusicFolderSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [MusicFolderSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [MusicFolderSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: MusicFolderWhereInput
+}
+
+input MusicFolderUpdateInput {
+  folderId: String
+  name: String
+  iconUrl: String
+  states: StateUpdateManyWithoutFolderInput
+  user: UserUpdateOneRequiredInput
+}
+
+input MusicFolderUpdateManyMutationInput {
+  folderId: String
+  name: String
+  iconUrl: String
+}
+
+input MusicFolderUpdateOneWithoutStatesInput {
+  create: MusicFolderCreateWithoutStatesInput
+  connect: MusicFolderWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: MusicFolderUpdateWithoutStatesDataInput
+  upsert: MusicFolderUpsertWithoutStatesInput
+}
+
+input MusicFolderUpdateWithoutStatesDataInput {
+  folderId: String
+  name: String
+  iconUrl: String
+  user: UserUpdateOneRequiredInput
+}
+
+input MusicFolderUpsertWithoutStatesInput {
+  update: MusicFolderUpdateWithoutStatesDataInput!
+  create: MusicFolderCreateWithoutStatesInput!
+}
+
+input MusicFolderWhereInput {
+  """Logical AND on all given filters."""
+  AND: [MusicFolderWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [MusicFolderWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [MusicFolderWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  folderId: String
+
+  """All values that are not equal to given value."""
+  folderId_not: String
+
+  """All values that are contained in given list."""
+  folderId_in: [String!]
+
+  """All values that are not contained in given list."""
+  folderId_not_in: [String!]
+
+  """All values less than the given value."""
+  folderId_lt: String
+
+  """All values less than or equal the given value."""
+  folderId_lte: String
+
+  """All values greater than the given value."""
+  folderId_gt: String
+
+  """All values greater than or equal the given value."""
+  folderId_gte: String
+
+  """All values containing the given string."""
+  folderId_contains: String
+
+  """All values not containing the given string."""
+  folderId_not_contains: String
+
+  """All values starting with the given string."""
+  folderId_starts_with: String
+
+  """All values not starting with the given string."""
+  folderId_not_starts_with: String
+
+  """All values ending with the given string."""
+  folderId_ends_with: String
+
+  """All values not ending with the given string."""
+  folderId_not_ends_with: String
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  iconUrl: String
+
+  """All values that are not equal to given value."""
+  iconUrl_not: String
+
+  """All values that are contained in given list."""
+  iconUrl_in: [String!]
+
+  """All values that are not contained in given list."""
+  iconUrl_not_in: [String!]
+
+  """All values less than the given value."""
+  iconUrl_lt: String
+
+  """All values less than or equal the given value."""
+  iconUrl_lte: String
+
+  """All values greater than the given value."""
+  iconUrl_gt: String
+
+  """All values greater than or equal the given value."""
+  iconUrl_gte: String
+
+  """All values containing the given string."""
+  iconUrl_contains: String
+
+  """All values not containing the given string."""
+  iconUrl_not_contains: String
+
+  """All values starting with the given string."""
+  iconUrl_starts_with: String
+
+  """All values not starting with the given string."""
+  iconUrl_not_starts_with: String
+
+  """All values ending with the given string."""
+  iconUrl_ends_with: String
+
+  """All values not ending with the given string."""
+  iconUrl_not_ends_with: String
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  states_every: StateWhereInput
+  states_some: StateWhereInput
+  states_none: StateWhereInput
+  user: UserWhereInput
+}
+
+input MusicFolderWhereUniqueInput {
+  id: ID
+  folderId: String
+}
+
 type Mutation {
-  createUser(data: UserCreateInput!): User!
   createGoogleInfo(data: GoogleInfoCreateInput!): GoogleInfo!
+  createMusicFolder(data: MusicFolderCreateInput!): MusicFolder!
+  createState(data: StateCreateInput!): State!
+  createUser(data: UserCreateInput!): User!
+  updateMusicFolder(data: MusicFolderUpdateInput!, where: MusicFolderWhereUniqueInput!): MusicFolder
+  updateState(data: StateUpdateInput!, where: StateWhereUniqueInput!): State
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  deleteMusicFolder(where: MusicFolderWhereUniqueInput!): MusicFolder
+  deleteState(where: StateWhereUniqueInput!): State
   deleteUser(where: UserWhereUniqueInput!): User
+  upsertMusicFolder(where: MusicFolderWhereUniqueInput!, create: MusicFolderCreateInput!, update: MusicFolderUpdateInput!): MusicFolder!
+  upsertState(where: StateWhereUniqueInput!, create: StateCreateInput!, update: StateUpdateInput!): State!
   upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
-  updateManyUsers(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
   updateManyGoogleInfoes(data: GoogleInfoUpdateManyMutationInput!, where: GoogleInfoWhereInput): BatchPayload!
-  deleteManyUsers(where: UserWhereInput): BatchPayload!
+  updateManyMusicFolders(data: MusicFolderUpdateManyMutationInput!, where: MusicFolderWhereInput): BatchPayload!
+  updateManyStates(data: StateUpdateManyMutationInput!, where: StateWhereInput): BatchPayload!
+  updateManyUsers(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
   deleteManyGoogleInfoes(where: GoogleInfoWhereInput): BatchPayload!
+  deleteManyMusicFolders(where: MusicFolderWhereInput): BatchPayload!
+  deleteManyStates(where: StateWhereInput): BatchPayload!
+  deleteManyUsers(where: UserWhereInput): BatchPayload!
 }
 
 enum MutationType {
@@ -519,11 +931,17 @@ type PageInfo {
 }
 
 type Query {
-  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
   googleInfoes(where: GoogleInfoWhereInput, orderBy: GoogleInfoOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [GoogleInfo]!
+  musicFolders(where: MusicFolderWhereInput, orderBy: MusicFolderOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [MusicFolder]!
+  states(where: StateWhereInput, orderBy: StateOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [State]!
+  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
+  musicFolder(where: MusicFolderWhereUniqueInput!): MusicFolder
+  state(where: StateWhereUniqueInput!): State
   user(where: UserWhereUniqueInput!): User
-  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
   googleInfoesConnection(where: GoogleInfoWhereInput, orderBy: GoogleInfoOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): GoogleInfoConnection!
+  musicFoldersConnection(where: MusicFolderWhereInput, orderBy: MusicFolderOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): MusicFolderConnection!
+  statesConnection(where: StateWhereInput, orderBy: StateOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): StateConnection!
+  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
 
   """Fetches an object given its ID"""
   node(
@@ -532,9 +950,474 @@ type Query {
   ): Node
 }
 
+type State implements Node {
+  id: ID!
+  folder: MusicFolder
+  status: Status!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  extraData: Json!
+  errorMessage: String
+}
+
+"""A connection to a list of items."""
+type StateConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [StateEdge]!
+  aggregate: AggregateState!
+}
+
+input StateCreateInput {
+  status: Status!
+  extraData: Json!
+  errorMessage: String
+  folder: MusicFolderCreateOneWithoutStatesInput
+}
+
+input StateCreateManyWithoutFolderInput {
+  create: [StateCreateWithoutFolderInput!]
+  connect: [StateWhereUniqueInput!]
+}
+
+input StateCreateWithoutFolderInput {
+  status: Status!
+  extraData: Json!
+  errorMessage: String
+}
+
+"""An edge in a connection."""
+type StateEdge {
+  """The item at the end of the edge."""
+  node: State!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum StateOrderByInput {
+  id_ASC
+  id_DESC
+  status_ASC
+  status_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  extraData_ASC
+  extraData_DESC
+  errorMessage_ASC
+  errorMessage_DESC
+}
+
+type StatePreviousValues {
+  id: ID!
+  status: Status!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  extraData: Json!
+  errorMessage: String
+}
+
+input StateScalarWhereInput {
+  """Logical AND on all given filters."""
+  AND: [StateScalarWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [StateScalarWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [StateScalarWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  status: Status
+
+  """All values that are not equal to given value."""
+  status_not: Status
+
+  """All values that are contained in given list."""
+  status_in: [Status!]
+
+  """All values that are not contained in given list."""
+  status_not_in: [Status!]
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  errorMessage: String
+
+  """All values that are not equal to given value."""
+  errorMessage_not: String
+
+  """All values that are contained in given list."""
+  errorMessage_in: [String!]
+
+  """All values that are not contained in given list."""
+  errorMessage_not_in: [String!]
+
+  """All values less than the given value."""
+  errorMessage_lt: String
+
+  """All values less than or equal the given value."""
+  errorMessage_lte: String
+
+  """All values greater than the given value."""
+  errorMessage_gt: String
+
+  """All values greater than or equal the given value."""
+  errorMessage_gte: String
+
+  """All values containing the given string."""
+  errorMessage_contains: String
+
+  """All values not containing the given string."""
+  errorMessage_not_contains: String
+
+  """All values starting with the given string."""
+  errorMessage_starts_with: String
+
+  """All values not starting with the given string."""
+  errorMessage_not_starts_with: String
+
+  """All values ending with the given string."""
+  errorMessage_ends_with: String
+
+  """All values not ending with the given string."""
+  errorMessage_not_ends_with: String
+}
+
+type StateSubscriptionPayload {
+  mutation: MutationType!
+  node: State
+  updatedFields: [String!]
+  previousValues: StatePreviousValues
+}
+
+input StateSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [StateSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [StateSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [StateSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: StateWhereInput
+}
+
+input StateUpdateInput {
+  status: Status
+  extraData: Json
+  errorMessage: String
+  folder: MusicFolderUpdateOneWithoutStatesInput
+}
+
+input StateUpdateManyDataInput {
+  status: Status
+  extraData: Json
+  errorMessage: String
+}
+
+input StateUpdateManyMutationInput {
+  status: Status
+  extraData: Json
+  errorMessage: String
+}
+
+input StateUpdateManyWithoutFolderInput {
+  create: [StateCreateWithoutFolderInput!]
+  connect: [StateWhereUniqueInput!]
+  disconnect: [StateWhereUniqueInput!]
+  delete: [StateWhereUniqueInput!]
+  update: [StateUpdateWithWhereUniqueWithoutFolderInput!]
+  updateMany: [StateUpdateManyWithWhereNestedInput!]
+  deleteMany: [StateScalarWhereInput!]
+  upsert: [StateUpsertWithWhereUniqueWithoutFolderInput!]
+}
+
+input StateUpdateManyWithWhereNestedInput {
+  where: StateScalarWhereInput!
+  data: StateUpdateManyDataInput!
+}
+
+input StateUpdateWithoutFolderDataInput {
+  status: Status
+  extraData: Json
+  errorMessage: String
+}
+
+input StateUpdateWithWhereUniqueWithoutFolderInput {
+  where: StateWhereUniqueInput!
+  data: StateUpdateWithoutFolderDataInput!
+}
+
+input StateUpsertWithWhereUniqueWithoutFolderInput {
+  where: StateWhereUniqueInput!
+  update: StateUpdateWithoutFolderDataInput!
+  create: StateCreateWithoutFolderInput!
+}
+
+input StateWhereInput {
+  """Logical AND on all given filters."""
+  AND: [StateWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [StateWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [StateWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  status: Status
+
+  """All values that are not equal to given value."""
+  status_not: Status
+
+  """All values that are contained in given list."""
+  status_in: [Status!]
+
+  """All values that are not contained in given list."""
+  status_not_in: [Status!]
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  errorMessage: String
+
+  """All values that are not equal to given value."""
+  errorMessage_not: String
+
+  """All values that are contained in given list."""
+  errorMessage_in: [String!]
+
+  """All values that are not contained in given list."""
+  errorMessage_not_in: [String!]
+
+  """All values less than the given value."""
+  errorMessage_lt: String
+
+  """All values less than or equal the given value."""
+  errorMessage_lte: String
+
+  """All values greater than the given value."""
+  errorMessage_gt: String
+
+  """All values greater than or equal the given value."""
+  errorMessage_gte: String
+
+  """All values containing the given string."""
+  errorMessage_contains: String
+
+  """All values not containing the given string."""
+  errorMessage_not_contains: String
+
+  """All values starting with the given string."""
+  errorMessage_starts_with: String
+
+  """All values not starting with the given string."""
+  errorMessage_not_starts_with: String
+
+  """All values ending with the given string."""
+  errorMessage_ends_with: String
+
+  """All values not ending with the given string."""
+  errorMessage_not_ends_with: String
+  folder: MusicFolderWhereInput
+}
+
+input StateWhereUniqueInput {
+  id: ID
+}
+
+enum Status {
+  FETCHING
+  DOWNLOADING
+  READY
+}
+
 type Subscription {
-  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
   googleInfo(where: GoogleInfoSubscriptionWhereInput): GoogleInfoSubscriptionPayload
+  musicFolder(where: MusicFolderSubscriptionWhereInput): MusicFolderSubscriptionPayload
+  state(where: StateSubscriptionWhereInput): StateSubscriptionPayload
+  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
 }
 
 type User implements Node {
@@ -544,6 +1427,8 @@ type User implements Node {
   displayName: String!
   picture: String!
   refreshToken: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 """A connection to a list of items."""
@@ -561,7 +1446,24 @@ input UserCreateInput {
   displayName: String!
   picture: String!
   refreshToken: String!
-  googleInfo: GoogleInfoCreateOneInput!
+  googleInfo: GoogleInfoCreateOneWithoutUserInput!
+}
+
+input UserCreateOneInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutGoogleInfoInput {
+  create: UserCreateWithoutGoogleInfoInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateWithoutGoogleInfoInput {
+  providerId: String!
+  displayName: String!
+  picture: String!
+  refreshToken: String!
 }
 
 """An edge in a connection."""
@@ -584,10 +1486,10 @@ enum UserOrderByInput {
   picture_DESC
   refreshToken_ASC
   refreshToken_DESC
-  updatedAt_ASC
-  updatedAt_DESC
   createdAt_ASC
   createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
 }
 
 type UserPreviousValues {
@@ -596,6 +1498,8 @@ type UserPreviousValues {
   displayName: String!
   picture: String!
   refreshToken: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type UserSubscriptionPayload {
@@ -637,12 +1541,20 @@ input UserSubscriptionWhereInput {
   node: UserWhereInput
 }
 
+input UserUpdateDataInput {
+  providerId: String
+  displayName: String
+  picture: String
+  refreshToken: String
+  googleInfo: GoogleInfoUpdateOneRequiredWithoutUserInput
+}
+
 input UserUpdateInput {
   providerId: String
   displayName: String
   picture: String
   refreshToken: String
-  googleInfo: GoogleInfoUpdateOneRequiredInput
+  googleInfo: GoogleInfoUpdateOneRequiredWithoutUserInput
 }
 
 input UserUpdateManyMutationInput {
@@ -650,6 +1562,18 @@ input UserUpdateManyMutationInput {
   displayName: String
   picture: String
   refreshToken: String
+}
+
+input UserUpdateOneRequiredInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+  update: UserUpdateDataInput
+  upsert: UserUpsertNestedInput
+}
+
+input UserUpsertNestedInput {
+  update: UserUpdateDataInput!
+  create: UserCreateInput!
 }
 
 input UserWhereInput {
@@ -861,6 +1785,50 @@ input UserWhereInput {
 
   """All values not ending with the given string."""
   refreshToken_not_ends_with: String
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
   googleInfo: GoogleInfoWhereInput
 }
 

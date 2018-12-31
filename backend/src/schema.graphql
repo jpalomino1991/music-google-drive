@@ -1,5 +1,8 @@
+# import * from './generated/prisma.graphql'
+
 type Query {
   me: User
+  folder: MusicFolder
 }
 
 type User {
