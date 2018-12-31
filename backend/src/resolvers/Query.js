@@ -10,7 +10,7 @@ const Query = {
       info
     );
   },
-  folder(
+  folders(
     parent,
     args,
     {
@@ -22,7 +22,6 @@ const Query = {
     if (!userId) throw new Error('You must be signin.');
     return db.query.musicFolders(
       {
-        first: 1,
         where: {
           user: {
             id: userId
