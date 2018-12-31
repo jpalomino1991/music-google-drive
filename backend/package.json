@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.3",
     "cookie-parser": "^1.4.3",
     "dotenv": "^6.2.0",
     "googleapis": "^36.0.0",

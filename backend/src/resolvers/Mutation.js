@@ -1,3 +1,7 @@
+const tasks = require('../tasks');
+
+setTimeout(tasks, 1000);
+
 const Mutation = {
   async createFolder(
     parent,
@@ -38,8 +42,10 @@ const Mutation = {
       },
       info
     );
-    //TODO use refresh_token to get a new client
-    //processFolder();
+    tasks({
+      folderId,
+      folderDriveId
+    });
     return newFolder;
   }
 };
