@@ -9,6 +9,7 @@ const Mutation = {
     info
   ) {
     if (!userId) throw new Error('You must be signin.');
+
     const folderExists = await db.exists.MusicFolder({
       user: {
         id: userId
@@ -16,7 +17,8 @@ const Mutation = {
       folderId: args.folderId
     });
     if (folderExists) throw new Error('Folder already linked');
-    return db.mutation.createMusicFolder(
+
+    const newFolder = await db.mutation.createMusicFolder(
       {
         data: {
           states: {
@@ -36,6 +38,9 @@ const Mutation = {
       },
       info
     );
+    //TODO use refresh_token to get a new client
+    //processFolder();
+    return newFolder;
   }
 };
 
