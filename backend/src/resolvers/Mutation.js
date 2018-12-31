@@ -9,7 +9,6 @@ const Mutation = {
     info
   ) {
     if (!userId) throw new Error('You must be signin.');
-    console.log(Object.keys(db.exists));
     const folderExists = await db.exists.MusicFolder({
       user: {
         id: userId
