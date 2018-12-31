@@ -1,5 +1,5 @@
 # source: https://us1.prisma.sh/music-drive/music-drive/dev
-# timestamp: Sun Dec 30 2018 18:51:24 GMT-0500 (-05)
+# timestamp: Sun Dec 30 2018 22:03:43 GMT-0500 (-05)
 
 type AggregateGoogleInfo {
   count: Int!
@@ -956,7 +956,7 @@ type State implements Node {
   status: Status!
   createdAt: DateTime!
   updatedAt: DateTime!
-  extraData: Json!
+  extraData: Json
   errorMessage: String
 }
 
@@ -972,7 +972,7 @@ type StateConnection {
 
 input StateCreateInput {
   status: Status!
-  extraData: Json!
+  extraData: Json
   errorMessage: String
   folder: MusicFolderCreateOneWithoutStatesInput
 }
@@ -984,7 +984,7 @@ input StateCreateManyWithoutFolderInput {
 
 input StateCreateWithoutFolderInput {
   status: Status!
-  extraData: Json!
+  extraData: Json
   errorMessage: String
 }
 
@@ -1017,7 +1017,7 @@ type StatePreviousValues {
   status: Status!
   createdAt: DateTime!
   updatedAt: DateTime!
-  extraData: Json!
+  extraData: Json
   errorMessage: String
 }
 
@@ -1408,6 +1408,7 @@ input StateWhereUniqueInput {
 }
 
 enum Status {
+  STARTING
   FETCHING
   DOWNLOADING
   READY

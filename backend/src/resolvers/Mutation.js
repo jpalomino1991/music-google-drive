@@ -19,6 +19,13 @@ const Mutation = {
     return db.mutation.createMusicFolder(
       {
         data: {
+          states: {
+            create: [
+              {
+                status: 'STARTING'
+              }
+            ]
+          },
           user: {
             connect: {
               id: userId

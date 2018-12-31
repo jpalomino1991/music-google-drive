@@ -1,4 +1,5 @@
 enum Status {
+  STARTING
   FETCHING
   DOWNLOADING
   READY
@@ -35,7 +36,7 @@ type MusicFolder {
   iconUrl: String
   createdAt: DateTime!
   updatedAt: DateTime!
-  states: [State!] @relation(name: "StateByMusicFolder" onDelete: CASCADE)
+  states: [State!]! @relation(name: "StateByMusicFolder" onDelete: CASCADE)
   user: User!
 }
 
@@ -45,6 +46,6 @@ type State {
   status: Status!
   createdAt: DateTime!
   updatedAt: DateTime!
-  extraData: Json!
+  extraData: Json
   errorMessage: String
 }
