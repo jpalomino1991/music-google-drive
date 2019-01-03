@@ -2,6 +2,7 @@ enum Status {
   STARTING
   FETCHING
   DOWNLOADING
+  FINISHING
   READY
 }
 
