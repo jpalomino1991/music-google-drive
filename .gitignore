@@ -114,7 +114,10 @@ tags
 # Ignore all local history of files
 .history
 
+# End of https://www.gitignore.io/api/vim,node,visualstudiocode
+
 metadata.txt
 credentials.json
 token.json
-# End of https://www.gitignore.io/api/vim,node,visualstudiocode
+backend/src/temp/*
+!backend/src/temp/.gitkeep
