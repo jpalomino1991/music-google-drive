@@ -40,7 +40,7 @@ const Mutation = {
       },
       info
     );
-    await tasks({
+    tasks({
       folderDriveId: args.folderId,
       folderId: newFolder.id,
       refreshToken: (await db.query.user({
