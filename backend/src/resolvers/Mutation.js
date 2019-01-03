@@ -1,7 +1,5 @@
 const tasks = require('../tasks');
 
-setTimeout(tasks, 1000);
-
 const Mutation = {
   async createFolder(
     parent,
@@ -42,9 +40,14 @@ const Mutation = {
       },
       info
     );
-    tasks({
-      folderId,
-      folderDriveId
+    await tasks({
+      folderDriveId: args.folderId,
+      folderId: newFolder.id,
+      refreshToken: (await db.query.user({
+        where: {
+          id: userId
+        }
+      })).refreshToken
     });
     return newFolder;
   }
