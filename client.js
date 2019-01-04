@@ -1,4 +1,5 @@
 const fs = require('fs');
+var path = require('path');
 const readline = require('readline');
 const {google} = require('googleapis');
 const NodeID3 = require('node-id3');
@@ -114,7 +115,7 @@ function listFiles(auth) {
 
   var nextPageToken = '';
   console.log('download began at ' + d.toISOString().slice(0,20));
-  //getNextFile(drive,nextPageToken);  
+  getNextFile(drive,nextPageToken);
 }
 
 function getNextFile(drive,nextPageToken)
@@ -123,8 +124,8 @@ function getNextFile(drive,nextPageToken)
   {
     drive.files.list({
       pageSize: 10,
-      fields: 'nextPageToken, files(id,name,webContentLink)',
-      q: 'mimeType="audio/mp3"',
+      fields: 'nextPageToken, files(id, name, kind, folderColorRgb, fileExtension, mimeType, parents, webContentLink)',
+      q: "'1X9Fp5QoqKoJwxlmrNJICYfE5Et8G1K3G' IN parents AND (mimeType = 'audio/mp3' OR mimeType = 'audio/flac' OR mimeType = 'application/vnd.google-apps.folder')",
       corpus: 'user',
       pageToken: nextPageToken,
       kind: "drive#permissionList"
@@ -133,7 +134,7 @@ function getNextFile(drive,nextPageToken)
       nextPageToken = result.data.nextPageToken;
       console.log('token: ' + nextPageToken);
 
-      const files = result.data.files;      
+      const files = result.data.files;
       if (files.length) {
         processFile(drive,files,0);
         //console.log(files[1].webContentLink);
@@ -155,17 +156,19 @@ function processFile(drive,files,index)
     //console.log(`${file.name} (${file.id})`);
     var file = files[index];
     var fileId = file.id;
-    var tempPath = 'C:\\Users\\Alejandro\\AppData\\Local\\Temp\\';
-    var dest = fs.createWriteStream(tempPath + file.name);
-    drive.files.get({headers: {Range: "bytes=0-1024"},fileId: fileId, alt: 'media', Range: bytes=0-1024}, {responseType: 'stream'},
+    var tempPath = path.join(__dirname,'temp',file.name);
+    var dest = fs.createWriteStream(tempPath);
+    console.log(file);
+    drive.files.get({headers: {Range: "bytes=0-8192"},fileId: fileId, alt: 'media'}, {responseType: 'stream'},
       function(err, res){
-        console.log(res.data);
+        //console.log(res.data);
         res.data
         .on('end', () => {
             //let tags = NodeID3.read(tempPath + file.name);
-            NodeID3.read(tempPath + file.name, function(err, tags) { 
+            NodeID3.read(tempPath, function(err, tags) { 
               console.log(tags);
-              client.index({
+              //fs.unlinkSync(tempPath);
+              /*client.index({
                 index: 'song',
                 type: 'music',
                 body: {
@@ -186,9 +189,10 @@ function processFile(drive,files,index)
                 }
                 //console.log(resp);
                 console.log('downloaded ' + file.name);
-                processFile(drive,files,index + 1)
-              });
+                processFile(drive,files,index + 1);
+              });*/
             });
+            processFile(drive,files,index + 1);
         })
         .on('UnhandledPromiseRejection', function(reason, promise) {
           console.log('Unhandled Rejection at:', reason.stack || reason);
@@ -311,6 +315,11 @@ app.post("/updateDocument", function(req, res) {
 var listener = app.listen(10000, function() {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+
+process.on('unhandledRejection', (err) => { 
+  console.error(err)
+  process.exit(1)
+})
 
 /*to insert in mongodb
 var mongoose = require('mongoose');
