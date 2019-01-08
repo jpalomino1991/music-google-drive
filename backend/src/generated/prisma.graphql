@@ -1,5 +1,5 @@
 # source: https://us1.prisma.sh/music-drive/music-drive/dev
-# timestamp: Wed Jan 02 2019 12:46:41 GMT-0500 (-05)
+# timestamp: Mon Jan 07 2019 19:40:50 GMT-0500 (-05)
 
 type AggregateGoogleInfo {
   count: Int!
@@ -876,7 +876,6 @@ input MusicFolderWhereInput {
 
 input MusicFolderWhereUniqueInput {
   id: ID
-  folderId: String
 }
 
 type Mutation {

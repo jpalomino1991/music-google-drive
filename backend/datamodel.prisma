@@ -32,7 +32,7 @@ type User {
 
 type MusicFolder {
   id: ID! @unique
-  folderId: String! @unique
+  folderId: String!
   name: String!
   iconUrl: String
   createdAt: DateTime!
