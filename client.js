@@ -4,6 +4,7 @@ const readline = require('readline');
 const {google} = require('googleapis');
 const NodeID3 = require('node-id3');
 const elasticsearch = require('elasticsearch');
+const mm = require('music-metadata');
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -125,7 +126,8 @@ function getNextFile(drive,nextPageToken)
     drive.files.list({
       pageSize: 10,
       fields: 'nextPageToken, files(id, name, kind, folderColorRgb, fileExtension, mimeType, parents, webContentLink)',
-      q: "'1X9Fp5QoqKoJwxlmrNJICYfE5Et8G1K3G' IN parents AND (mimeType = 'audio/mp3' OR mimeType = 'audio/flac' OR mimeType = 'application/vnd.google-apps.folder')",
+      //q: "'0B1vzmxkaJSEAU1dWTkNfcTU3Q1E' IN parents AND (mimeType = 'audio/flac' OR mimeType = 'audio/mpeg' OR mimeType = 'application/x-flac')",
+      q: "'1X9Fp5QoqKoJwxlmrNJICYfE5Et8G1K3G' IN parents AND (fileExtension = 'flac')",
       corpus: 'user',
       pageToken: nextPageToken,
       kind: "drive#permissionList"
@@ -165,9 +167,18 @@ function processFile(drive,files,index)
         res.data
         .on('end', () => {
             //let tags = NodeID3.read(tempPath + file.name);
-            NodeID3.read(tempPath, function(err, tags) { 
+            console.log(tempPath);
+            mm.parseFile(tempPath,{native: true})
+              .then(metadata => {
+                console.log(metadata.common);
+                fs.unlinkSync(tempPath);
+              })
+              .catch(err => {
+                console.error(err.message)
+              });
+            /*NodeID3.read(tempPath, function(err, tags) { 
               console.log(tags);
-              //fs.unlinkSync(tempPath);
+              fs.unlinkSync(tempPath);
               /*client.index({
                 index: 'song',
                 type: 'music',
@@ -190,8 +201,8 @@ function processFile(drive,files,index)
                 //console.log(resp);
                 console.log('downloaded ' + file.name);
                 processFile(drive,files,index + 1);
-              });*/
-            });
+              });
+            });*/
             processFile(drive,files,index + 1);
         })
         .on('UnhandledPromiseRejection', function(reason, promise) {
