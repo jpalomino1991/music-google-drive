@@ -1,5 +1,12 @@
+# import * from './generated/prisma.graphql'
+
 type Query {
   me: User
+  folders: [MusicFolder!]
+}
+
+type Mutation {
+  createFolder(folderId: String name: String! iconUrl: String): MusicFolder
 }
 
 type User {

@@ -1,4 +1,13 @@
+enum Status {
+  STARTING
+  FETCHING
+  DOWNLOADING
+  FINISHING
+  READY
+}
+
 type GoogleInfo {
+  user: User @relation(name: "GoogleInfoByUser")
   etag: String
   familyName: String
   givenName: String
@@ -13,8 +22,31 @@ type GoogleInfo {
 type User {
   id: ID! @unique
   providerId: String! @unique
-  googleInfo: GoogleInfo!
+  googleInfo: GoogleInfo! @relation(name: "GoogleInfoByUser" onDelete: CASCADE)
   displayName: String!
   picture: String!
   refreshToken: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type MusicFolder {
+  id: ID! @unique
+  folderId: String!
+  name: String!
+  iconUrl: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  states: [State!]! @relation(name: "StateByMusicFolder" onDelete: CASCADE)
+  user: User!
+}
+
+type State {
+  id: ID! @unique
+  folder: MusicFolder @relation(name: "StateByMusicFolder")
+  status: Status!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  extraData: Json
+  errorMessage: String
 }
