@@ -1,94 +1,78 @@
 const fs = require('fs');
+const util = require('util');
 const LineReader = require('line-by-line');
 const NodeID3 = require('node-id3');
 const Promise = require('bluebird');
 
+const utils = require('../utils');
+const drive = require('./drive');
 const fileWriteStream = require('./fileWriteStream');
-
-function sleep(ms = 0) {
-  return new Promise(r => setTimeout(r, ms));
-}
-
+const extractMetadata = require('./extractMetadata');
 const db = require('../db');
+
+const unlink = util.promisify(fs.unlink);
 
 const processFile = async (errorStream, driveClient, song) => {
   const { id, parent, name } = song;
-  const path = `./src/temp/${id}`;
-  const dest = fs.createWriteStream(path);
+  const path = `./src/temp/${id}.${song.fileExtension}`;
   try {
-    await new Promise((resolve, reject) => {
-      driveClient.files.get(
-        {
-          headers: { Range: 'bytes=0-1024' },
-          fileId: id,
-          alt: 'media',
-          Range: (bytes = 0 - 1024)
-        },
-        { responseType: 'stream' },
-
-        (err, res) => {
-          if (err) return reject(err);
-          res.data
-            .on('end', resolve)
-            .on('UnhandledPromiseRejection', function(reason, promise) {
-              console.log(
-                'Unhandled Rejection at:',
-                'ERRORRR',
-                reason.stack || reason
-              );
-              reject(reason);
-            })
-            .on('error', err => {
-              console.log('Error', 'ERRORRR', err);
-              reject(err);
-            })
-            .pipe(dest);
-        }
-      );
+    await drive.createPartialFile({
+      driveClient,
+      fileId: id,
+      path
     });
 
-    const tags = await new Promise((resolve, reject) => {
-      NodeID3.read(path, function(err, tags) {
-        if (err) return console.log('ERRORRR', err) || reject(err);
-        resolve(tags);
-      });
+    const tags = await extractMetadata({
+      path,
+      song
     });
 
-    await new Promise((resolve, reject) => {
-      fs.unlink(path, err => {
-        if (err) return console.log('ERRORRR', err) || reject(err);
-        resolve();
-      });
-    });
+    await unlink(path);
+    console.log(tags);
+
     console.log('-----------', name);
   } catch (e) {
-    errorStream.write({ ...song, error: e.message ? e.message : e });
-    console.log('ERROR ---', name, id);
+    fs.unlink(path, err => {});
+    console.log('ERROR ---', name, id, e);
+    errorStream.write({ ...song });
   }
 };
 
 const MAX_LINES = 10;
 
-module.exports = async ({ driveClient, folderDriveId, folderId, counts }) => {
-  const errorStream = fileWriteStream(`./src/temp/error_${folderDriveId}`);
-  const newState = await db.mutation.createState({
+const updateState = async ({ counts, processedSongs, newStateId }) =>
+  db.mutation.updateState({
     data: {
-      status: 'DOWNLOADING',
       extraData: {
         total: counts.files,
-        processed: 0
-      },
-      folder: {
-        connect: {
-          id: folderId
-        }
+        processed: processedSongs
       }
+    },
+    where: {
+      id: newStateId
     }
   });
+
+module.exports = async ({
+  driveClient,
+  folderDriveId,
+  folderId,
+  counts,
+  newStateId,
+  start,
+  end
+}) => {
+  const errorStream = fileWriteStream(`./src/temp/error_${folderDriveId}`);
+
   const lineReader = new LineReader(`./src/temp/songs_${folderDriveId}`);
   let songs = [];
+  let lines = -1;
   let processedSongs = 0;
   lineReader.on('line', async line => {
+    lines++;
+    if (lines < start || lines > end) {
+      return;
+    }
     songs.push(line);
     if (songs.length === MAX_LINES) {
       lineReader.pause();
@@ -99,19 +83,14 @@ module.exports = async ({ driveClient, folderDriveId, folderId, counts }) => {
         )
       );
       processedSongs += MAX_LINES;
-      await db.mutation.updateState({
-        data: {
-          extraData: {
-            total: counts.files,
-            processed: processedSongs
-          }
-        },
-        where: {
-          id: newState.id
-        }
+      await updateState({
+        counts,
+        processedSongs,
+        newStateId
       });
+
       songs = [];
-      await sleep(1500);
+      await utils.sleep(1500);
       lineReader.resume();
     }
   });
@@ -124,20 +103,13 @@ module.exports = async ({ driveClient, folderDriveId, folderId, counts }) => {
         )
       );
     }
-
     processedSongs += songs.length;
-    errorStream.end();
-    await db.mutation.updateState({
-      data: {
-        extraData: {
-          total: counts.files,
-          processed: processedSongs
-        }
-      },
-      where: {
-        id: newState.id
-      }
+    await updateState({
+      counts,
+      processedSongs,
+      newStateId
     });
+    errorStream.end();
     console.log('close file');
   });
 };

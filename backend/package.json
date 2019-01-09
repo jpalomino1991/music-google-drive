@@ -21,6 +21,7 @@
     "graphql-yoga": "^1.16.9",
     "jsonwebtoken": "^8.4.0",
     "line-by-line": "^0.1.6",
+    "music-metadata": "^3.5.0",
     "node-id3": "^0.1.7",
     "nodemon": "^1.18.9",
     "prisma": "^1.23.2",
