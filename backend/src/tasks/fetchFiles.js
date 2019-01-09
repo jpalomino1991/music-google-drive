@@ -1,52 +1,36 @@
 const fs = require('fs');
 const Promise = require('bluebird');
 
+const drive = require('./drive');
+const utils = require('../utils');
 const db = require('../db');
 const fileWriteStream = require('./fileWriteStream');
 
-const isType = matchType => type => type.indexOf(matchType) > -1;
-
-const isFolder = ({ mimeType }) => isType('folder')(mimeType);
-
-function sleep(ms = 0) {
-  return new Promise(r => setTimeout(r, ms));
-}
-
-const fetchFolderContent = async (drive, id, pageToken) => {
-  await sleep(1000);
-  const { data } = await drive.files.list({
-    q: `'${id}' in parents`,
-    includeTeamDriveItems: true,
-    supportsTeamDrives: true,
-    fields:
-      'nextPageToken, files(id, name, kind, folderColorRgb, fileExtension, mimeType, parents, webContentLink)',
-    spaces: 'drive',
-    pageToken,
-    pageSize: 100
-  });
-  return data;
-};
-
 const fetchDrive = async (
   { songsStream, foldersStream },
-  drive,
+  driveClient,
   id,
   pageToken
 ) => {
-  const { token, files = [] } = await fetchFolderContent(drive, id, pageToken);
+  await utils.sleep(1000);
+  const { token, files = [] } = await drive.fetchFolderContent({
+    driveClient,
+    parentId: id,
+    pageToken
+  });
   if (token) {
     return await fetchDrive(
       {
         songsStream,
         foldersStream
       },
-      drive,
+      driveClient,
       id,
       token
     );
   }
   return await Promise.each(files, async item => {
-    const isFolderType = isFolder(item);
+    const isFolderType = drive.isFolder(item);
     if (isFolderType) {
       foldersStream.write({ ...item, parent: id });
       console.log('folder', item);
@@ -55,14 +39,12 @@ const fetchDrive = async (
           songsStream,
           foldersStream
         },
-        drive,
+        driveClient,
         item.id
       );
     }
-    if (['mp3', 'flac'].includes(item.fileExtension)) {
-      console.log('file', item);
-      songsStream.write({ ...item, parent: id });
-    }
+    console.log('file', item);
+    songsStream.write({ ...item, parent: id });
   });
 };
 

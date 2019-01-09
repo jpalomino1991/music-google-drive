@@ -1,48 +1,38 @@
 const { google } = require('googleapis');
 
+const db = require('../db');
+const drive = require('./drive');
 const fetchFiles = require('./fetchFiles');
 const processMetadata = require('./processMetadata');
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URL
-);
-
 module.exports = async ({ folderDriveId, folderId, refreshToken }) => {
   try {
-    const { tokens } = await oauth2Client.refreshToken(refreshToken);
-    oauth2Client.setCredentials(tokens);
-    const drive = google.drive({
-      version: 'v3',
-      auth: oauth2Client
-    });
     const counts = await fetchFiles({
-      driveClient: drive,
+      driveClient: await drive.createClient(refreshToken),
       folderId,
       folderDriveId
     });
-    console.log('end fetch');
+    const newState = await db.mutation.createState({
+      data: {
+        status: 'DOWNLOADING',
+        extraData: counts,
+        folder: {
+          connect: {
+            id: folderId
+          }
+        }
+      }
+    });
     await processMetadata({
-      driveClient: drive,
+      driveClient: await drive.createClient(refreshToken),
       folderId,
       folderDriveId,
-      counts
-      //counts: {
-      //folders: 880,
-      //files: 6317
-      //}
+      counts,
+      newStateId: newState.id,
+      start: 0,
+      end: 8000
     });
   } catch (e) {
     console.log('err', e);
   }
-  //const gg = await plus.people.get({ userId: 'me' });
-  //console.log('gg', gg.data);
-  //fetch files and folders in txt items_USERID
-  // -> start: update to fetching
-  // -> ongoing: update total and fetched (files and folders)
-  //extract metadadata from txt items_USERID
-  // -> start: update to processing set total files
-  // ongoing: update proessing files
-  // -> on finish: upload to elastic, delete file, update state to DONE
 };
