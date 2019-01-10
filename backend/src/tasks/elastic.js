@@ -1,9 +1,31 @@
-const elasticsearch = require('elasticsearch');
+let AWS = require('aws-sdk');
 
-var client = new elasticsearch.Client({
+let options = {
   host: process.env.ELASTIC_URL,
-  log: 'trace'
-});
+  connectionClass: require('http-aws-es'),
+  awsConfig: new AWS.Config({
+    credentials: new AWS.Credentials(
+      process.env.ELASTIC_ACCESS_KEY_ID,
+      process.env.ELASTIC_ACCESS_KEY_SECRET
+    ),
+    region: process.env.ELASTIC_REGION
+  })
+};
+
+let client = require('elasticsearch').Client(options);
+
+client.ping(
+  {
+    requestTimeout: 30000
+  },
+  function(error) {
+    if (error) {
+      console.trace('elasticsearch cluster is down!', error);
+    } else {
+      console.log('All is well');
+    }
+  }
+);
 
 module.exports.uploadSong = (file, metadata) => {
   return client.index({
