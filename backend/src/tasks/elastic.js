@@ -14,19 +14,6 @@ let options = {
 
 let client = require('elasticsearch').Client(options);
 
-client.ping(
-  {
-    requestTimeout: 30000
-  },
-  function(error) {
-    if (error) {
-      console.trace('elasticsearch cluster is down!', error);
-    } else {
-      console.log('All is well');
-    }
-  }
-);
-
 module.exports.uploadSong = (file, metadata) => {
   return client.index({
     index: 'song',
@@ -43,3 +30,25 @@ module.exports.uploadSong = (file, metadata) => {
     }
   });
 };
+
+const createIndexIfNotExists = async index => {
+  const exists = await client.indices.exists({
+    index: 'song'
+  });
+  if (!exists) {
+    return await client.indices.create({
+      index: 'song'
+    });
+  }
+};
+
+const setup = async () => {
+  try {
+    await createIndexIfNotExists('song');
+    await createIndexIfNotExists('folders');
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+setup();
