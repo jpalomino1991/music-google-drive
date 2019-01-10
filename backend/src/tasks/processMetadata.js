@@ -10,6 +10,8 @@ const fileWriteStream = require('./fileWriteStream');
 const extractMetadata = require('./extractMetadata');
 const db = require('../db');
 
+const BLOCK_SIZE = 2000;
+
 const unlink = util.promisify(fs.unlink);
 
 const processFile = async (errorStream, driveClient, song) => {
@@ -28,8 +30,9 @@ const processFile = async (errorStream, driveClient, song) => {
     });
 
     await unlink(path);
-    console.log(tags);
 
+    //console.log(tags);
+    return tags;
     console.log('-----------', name);
   } catch (e) {
     fs.unlink(path, err => {});
@@ -53,21 +56,23 @@ const updateState = async ({ counts, processedSongs, newStateId }) =>
     }
   });
 
-module.exports = async ({
-  driveClient,
+const startProcess = async ({
+  refreshToken,
   folderDriveId,
   folderId,
   counts,
   newStateId,
-  start,
-  end
+  start = 0,
+  end,
+  previousProcessedSongs = 0
 }) => {
+  const driveClient = await drive.createClient(refreshToken);
   const errorStream = fileWriteStream(`./src/temp/error_${folderDriveId}`);
 
   const lineReader = new LineReader(`./src/temp/songs_${folderDriveId}`);
   let songs = [];
   let lines = -1;
-  let processedSongs = 0;
+  let processedSongs = previousProcessedSongs;
   lineReader.on('line', async line => {
     lines++;
     if (lines < start || lines > end) {
@@ -76,12 +81,13 @@ module.exports = async ({
     songs.push(line);
     if (songs.length === MAX_LINES) {
       lineReader.pause();
-      await Promise.all(
+      const tags = await Promise.all(
         songs.map(
           async song =>
             await processFile(errorStream, driveClient, JSON.parse(song))
         )
       );
+      console.log('tags', tags);
       processedSongs += MAX_LINES;
       await updateState({
         counts,
@@ -94,22 +100,66 @@ module.exports = async ({
       lineReader.resume();
     }
   });
-  lineReader.on('end', async () => {
-    if (songs.length) {
-      await Promise.all(
-        songs.map(
-          async song =>
-            await processFile(errorStream, driveClient, JSON.parse(song))
-        )
-      );
-    }
-    processedSongs += songs.length;
-    await updateState({
-      counts,
-      processedSongs,
-      newStateId
+  return new Promise(resolve => {
+    lineReader.on('end', async () => {
+      if (songs.length) {
+        const tags = await Promise.all(
+          songs.map(
+            async song =>
+              await processFile(errorStream, driveClient, JSON.parse(song))
+          )
+        );
+        console.log(tags);
+      }
+      processedSongs += songs.length;
+      await updateState({
+        counts,
+        processedSongs,
+        newStateId
+      });
+      errorStream.end();
+      console.log('close file');
+      resolve();
     });
-    errorStream.end();
-    console.log('close file');
   });
+};
+
+const generateRange = (end, blockSize) => {
+  let pastEnd = 0;
+  const ranges = [];
+  while (pastEnd < end) {
+    ranges.push({
+      start: pastEnd,
+      end: pastEnd + blockSize
+    });
+    pastEnd += blockSize + 1;
+  }
+  return ranges;
+};
+
+module.exports = async ({ refreshToken, folderId, folderDriveId, counts }) => {
+  const newState = await db.mutation.createState({
+    data: {
+      status: 'DOWNLOADING',
+      extraData: counts,
+      folder: {
+        connect: {
+          id: folderId
+        }
+      }
+    }
+  });
+  const ranges = generateRange(counts.files, BLOCK_SIZE);
+  await Promise.each(ranges, ({ start, end }, i) =>
+    startProcess({
+      refreshToken,
+      folderDriveId,
+      folderId,
+      counts,
+      newStateId: newState.id,
+      start,
+      end,
+      previousProcessedSongs: i * BLOCK_SIZE
+    })
+  );
 };

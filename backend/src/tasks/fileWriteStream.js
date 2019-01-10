@@ -1,9 +1,7 @@
 const fs = require('fs');
 
-module.exports = name => {
-  const stream = fs.createWriteStream(name, {
-    flags: 'w'
-  });
+module.exports = (name, options = { flags: 'w' }) => {
+  const stream = fs.createWriteStream(name, options);
   let lines = 0;
   return {
     write: data => {
