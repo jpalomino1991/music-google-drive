@@ -1,6 +1,7 @@
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const elastic = require('./tasks/elastic')
 
 const createServer = require('./createServer');
 const db = require('./db');
