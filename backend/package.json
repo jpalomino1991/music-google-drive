@@ -6,14 +6,14 @@
   "scripts": {
     "dev": "nodemon -e js,graphql -x node --inspect src/index.js",
     "prisma-deploy": "prisma deploy --env-file .env",
-		"precommit": "lint-staged"
+    "precommit": "lint-staged"
   },
-	"lint-staged": {
-		"*.js": [
-			"prettier --write",
-			"git add"
-		]
-	},
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -37,6 +37,7 @@
     "nodemon": "^1.18.9",
     "prettier": "^1.15.3",
     "prisma": "^1.23.2",
-    "prisma-binding": "^2.2.12"
+    "prisma-binding": "^2.2.12",
+    "ramda": "^0.26.1"
   }
 }
