@@ -1,7 +1,6 @@
 const fs = require('fs');
 const util = require('util');
 const LineReader = require('line-by-line');
-const NodeID3 = require('node-id3');
 const Promise = require('bluebird');
 
 const utils = require('../utils');
