@@ -30,13 +30,13 @@ const processFile = async (errorStream, driveClient, song) => {
 
     await unlink(path);
 
-    //console.log(tags);
     return tags;
     console.log('-----------', name);
   } catch (e) {
     fs.unlink(path, err => {});
     console.log('ERROR ---', name, id, e);
     errorStream.write({ ...song });
+    return null;
   }
 };
 
@@ -80,14 +80,13 @@ const startProcess = async ({
     songs.push(line);
     if (songs.length === MAX_LINES) {
       lineReader.pause();
-      const tags = await Promise.all(
+      const tags = (await Promise.all(
         songs.map(
           async song =>
             await processFile(errorStream, driveClient, JSON.parse(song))
         )
-      );
-      console.log('tags', tags);
-      processedSongs += MAX_LINES;
+      )).filter(t => t);
+      processedSongs += tags.length; //MAX_LINES;
       await updateState({
         counts,
         processedSongs,
