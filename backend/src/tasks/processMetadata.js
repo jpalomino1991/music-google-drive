@@ -8,6 +8,7 @@ const drive = require('./drive');
 const fileWriteStream = require('./fileWriteStream');
 const extractMetadata = require('./extractMetadata');
 const db = require('../db');
+const elastic = require('./elastic');
 
 const BLOCK_SIZE = 2000;
 
@@ -88,7 +89,7 @@ const startProcess = async ({
         }))
       )).filter(song => song.tags);
       processedSongs += songsWithTags.length; //MAX_LINES;
-      bulkUploadSongs(songsWithTags, providerId);
+      elastic.bulkUploadSongs(songsWithTags, providerId);
       await updateState({
         counts,
         processedSongs,
@@ -110,7 +111,7 @@ const startProcess = async ({
           }))
         )).filter(song => song.tags);
         processedSongs += songsWithTags.length;
-        bulkUploadSongs(songsWithTags, providerId);
+        elastic.bulkUploadSongs(songsWithTags, providerId);
       }
       processedSongs += songsWithTags.length;
       await updateState({
