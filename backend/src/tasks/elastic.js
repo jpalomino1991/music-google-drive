@@ -1,6 +1,7 @@
-let AWS = require('aws-sdk');
+const AWS = require('aws-sdk');
+const R = require('ramda');
 
-let options = {
+const options = {
   host: process.env.ELASTIC_URL,
   connectionClass: require('http-aws-es'),
   awsConfig: new AWS.Config({
@@ -12,12 +13,39 @@ let options = {
   })
 };
 
-let client = require('elasticsearch').Client(options);
+const client = require('elasticsearch').Client(options);
+
+const header = {
+  index: {
+    _index: 'music',
+    _type: 'song'
+  }
+};
+
+module.exports.bulkUploadSongs = (songs, providerId) =>
+  client.bulk({
+    body: R.compose(
+      R.insert(0, header),
+      R.intersperse(header),
+      R.map(({ file, tags }) => ({
+        parentId: file.parent,
+        providerId,
+        file: file.name,
+        title: tags.title || file.name,
+        artist: tags.artist,
+        album: tags.album,
+        year: tags.year,
+        genre: tags.genre,
+        link: file.webContentLink,
+        image: ''
+      }))
+    )(songs)
+  });
 
 module.exports.uploadSong = (file, metadata) => {
   return client.index({
-    index: 'song',
-    type: 'music',
+    index: 'music',
+    type: 'song',
     body: {
       file: file.name,
       title: metadata.title,
@@ -33,19 +61,18 @@ module.exports.uploadSong = (file, metadata) => {
 
 const createIndexIfNotExists = async index => {
   const exists = await client.indices.exists({
-    index: 'song'
+    index
   });
   if (!exists) {
     return await client.indices.create({
-      index: 'song'
+      index
     });
   }
 };
 
 const setup = async () => {
   try {
-    await createIndexIfNotExists('song');
-    await createIndexIfNotExists('folders');
+    await createIndexIfNotExists('music');
   } catch (e) {
     console.log(e);
   }

@@ -40,14 +40,16 @@ const Mutation = {
       },
       info
     );
+    const user = await db.query.user({
+      where: {
+        id: userId
+      }
+    });
     tasks({
       folderDriveId: args.folderId,
       folderId: newFolder.id,
-      refreshToken: (await db.query.user({
-        where: {
-          id: userId
-        }
-      })).refreshToken
+      refreshToken: user.refreshToken,
+      providerId: user.providerId
     });
     return newFolder;
   }

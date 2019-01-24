@@ -56,6 +56,7 @@ const updateState = async ({ counts, processedSongs, newStateId }) =>
   });
 
 const startProcess = async ({
+  providerId,
   refreshToken,
   folderDriveId,
   folderId,
@@ -80,13 +81,14 @@ const startProcess = async ({
     songs.push(line);
     if (songs.length === MAX_LINES) {
       lineReader.pause();
-      const tags = (await Promise.all(
-        songs.map(
-          async song =>
-            await processFile(errorStream, driveClient, JSON.parse(song))
-        )
-      )).filter(t => t);
-      processedSongs += tags.length; //MAX_LINES;
+      const songsWithTags = (await Promise.all(
+        songs.map(async song => ({
+          file: song,
+          tags: await processFile(errorStream, driveClient, JSON.parse(song))
+        }))
+      )).filter(song => song.tags);
+      processedSongs += songsWithTags.length; //MAX_LINES;
+      bulkUploadSongs(songsWithTags, providerId);
       await updateState({
         counts,
         processedSongs,
@@ -101,15 +103,16 @@ const startProcess = async ({
   return new Promise(resolve => {
     lineReader.on('end', async () => {
       if (songs.length) {
-        const tags = await Promise.all(
-          songs.map(
-            async song =>
-              await processFile(errorStream, driveClient, JSON.parse(song))
-          )
-        );
-        console.log(tags);
+        const songsWithTags = (await Promise.all(
+          songs.map(async song => ({
+            file: song,
+            tags: await processFile(errorStream, driveClient, JSON.parse(song))
+          }))
+        )).filter(song => song.tags);
+        processedSongs += songsWithTags.length;
+        bulkUploadSongs(songsWithTags, providerId);
       }
-      processedSongs += songs.length;
+      processedSongs += songsWithTags.length;
       await updateState({
         counts,
         processedSongs,
@@ -135,7 +138,13 @@ const generateRange = (end, blockSize) => {
   return ranges;
 };
 
-module.exports = async ({ refreshToken, folderId, folderDriveId, counts }) => {
+module.exports = async ({
+  providerId,
+  refreshToken,
+  folderId,
+  folderDriveId,
+  counts
+}) => {
   const newState = await db.mutation.createState({
     data: {
       status: 'DOWNLOADING',
@@ -150,6 +159,7 @@ module.exports = async ({ refreshToken, folderId, folderDriveId, counts }) => {
   const ranges = generateRange(counts.files, BLOCK_SIZE);
   await Promise.each(ranges, ({ start, end }, i) =>
     startProcess({
+      providerId,
       refreshToken,
       folderDriveId,
       folderId,

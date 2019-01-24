@@ -5,7 +5,12 @@ const drive = require('./drive');
 const fetchFiles = require('./fetchFiles');
 const processMetadata = require('./processMetadata');
 
-module.exports = async ({ folderDriveId, folderId, refreshToken }) => {
+module.exports = async ({
+  providerId,
+  folderDriveId,
+  folderId,
+  refreshToken
+}) => {
   try {
     const counts = await fetchFiles({
       driveClient: await drive.createClient(refreshToken),
@@ -14,6 +19,7 @@ module.exports = async ({ folderDriveId, folderId, refreshToken }) => {
     });
 
     await processMetadata({
+      providerId,
       refreshToken,
       folderId,
       folderDriveId,
