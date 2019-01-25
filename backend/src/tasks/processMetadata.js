@@ -31,8 +31,8 @@ const processFile = async (errorStream, driveClient, song) => {
 
     await unlink(path);
 
-    return tags;
     console.log('-----------', name);
+    return tags;
   } catch (e) {
     fs.unlink(path, err => {});
     console.log('ERROR ---', name, id, e);
@@ -89,7 +89,7 @@ const startProcess = async ({
         }))
       )).filter(song => song.tags);
       processedSongs += songsWithTags.length; //MAX_LINES;
-      elastic.bulkUploadSongs(songsWithTags, providerId);
+      await elastic.bulkUploadSongs(songsWithTags, providerId);
       await updateState({
         counts,
         processedSongs,
@@ -111,7 +111,7 @@ const startProcess = async ({
           }))
         )).filter(song => song.tags);
         processedSongs += songsWithTags.length;
-        elastic.bulkUploadSongs(songsWithTags, providerId);
+        await elastic.bulkUploadSongs(songsWithTags, providerId);
       }
       processedSongs += songsWithTags.length;
       await updateState({
