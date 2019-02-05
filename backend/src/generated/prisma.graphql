@@ -1,5 +1,5 @@
 # source: https://us1.prisma.sh/music-drive/music-drive/dev
-# timestamp: Mon Jan 07 2019 19:40:50 GMT-0500 (-05)
+# timestamp: Mon Feb 04 2019 16:25:38 GMT-0500 (Hora est. Pacífico, Sudamérica)
 
 type AggregateGoogleInfo {
   count: Int!
@@ -57,23 +57,7 @@ input GoogleInfoCreateInput {
   language: String
   isPlusUser: Boolean
   verified: Boolean
-  user: UserCreateOneWithoutGoogleInfoInput
-}
-
-input GoogleInfoCreateOneWithoutUserInput {
-  create: GoogleInfoCreateWithoutUserInput
-}
-
-input GoogleInfoCreateWithoutUserInput {
-  etag: String
-  familyName: String
-  givenName: String
-  kind: String
-  objectType: String
-  url: String
-  language: String
-  isPlusUser: Boolean
-  verified: Boolean
+  user: UserCreateOneInput
 }
 
 """An edge in a connection."""
@@ -173,29 +157,6 @@ input GoogleInfoUpdateManyMutationInput {
   language: String
   isPlusUser: Boolean
   verified: Boolean
-}
-
-input GoogleInfoUpdateOneRequiredWithoutUserInput {
-  create: GoogleInfoCreateWithoutUserInput
-  update: GoogleInfoUpdateWithoutUserDataInput
-  upsert: GoogleInfoUpsertWithoutUserInput
-}
-
-input GoogleInfoUpdateWithoutUserDataInput {
-  etag: String
-  familyName: String
-  givenName: String
-  kind: String
-  objectType: String
-  url: String
-  language: String
-  isPlusUser: Boolean
-  verified: Boolean
-}
-
-input GoogleInfoUpsertWithoutUserInput {
-  update: GoogleInfoUpdateWithoutUserDataInput!
-  create: GoogleInfoCreateWithoutUserInput!
 }
 
 input GoogleInfoWhereInput {
@@ -1226,6 +1187,7 @@ input StateUpdateManyMutationInput {
 input StateUpdateManyWithoutFolderInput {
   create: [StateCreateWithoutFolderInput!]
   connect: [StateWhereUniqueInput!]
+  set: [StateWhereUniqueInput!]
   disconnect: [StateWhereUniqueInput!]
   delete: [StateWhereUniqueInput!]
   update: [StateUpdateWithWhereUniqueWithoutFolderInput!]
@@ -1424,10 +1386,10 @@ type Subscription {
 type User implements Node {
   id: ID!
   providerId: String!
-  googleInfo: GoogleInfo!
   displayName: String!
   picture: String!
   refreshToken: String!
+  email: String!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -1447,24 +1409,12 @@ input UserCreateInput {
   displayName: String!
   picture: String!
   refreshToken: String!
-  googleInfo: GoogleInfoCreateOneWithoutUserInput!
+  email: String!
 }
 
 input UserCreateOneInput {
   create: UserCreateInput
   connect: UserWhereUniqueInput
-}
-
-input UserCreateOneWithoutGoogleInfoInput {
-  create: UserCreateWithoutGoogleInfoInput
-  connect: UserWhereUniqueInput
-}
-
-input UserCreateWithoutGoogleInfoInput {
-  providerId: String!
-  displayName: String!
-  picture: String!
-  refreshToken: String!
 }
 
 """An edge in a connection."""
@@ -1487,6 +1437,8 @@ enum UserOrderByInput {
   picture_DESC
   refreshToken_ASC
   refreshToken_DESC
+  email_ASC
+  email_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -1499,6 +1451,7 @@ type UserPreviousValues {
   displayName: String!
   picture: String!
   refreshToken: String!
+  email: String!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -1547,7 +1500,7 @@ input UserUpdateDataInput {
   displayName: String
   picture: String
   refreshToken: String
-  googleInfo: GoogleInfoUpdateOneRequiredWithoutUserInput
+  email: String
 }
 
 input UserUpdateInput {
@@ -1555,7 +1508,7 @@ input UserUpdateInput {
   displayName: String
   picture: String
   refreshToken: String
-  googleInfo: GoogleInfoUpdateOneRequiredWithoutUserInput
+  email: String
 }
 
 input UserUpdateManyMutationInput {
@@ -1563,6 +1516,7 @@ input UserUpdateManyMutationInput {
   displayName: String
   picture: String
   refreshToken: String
+  email: String
 }
 
 input UserUpdateOneRequiredInput {
@@ -1786,6 +1740,46 @@ input UserWhereInput {
 
   """All values not ending with the given string."""
   refreshToken_not_ends_with: String
+  email: String
+
+  """All values that are not equal to given value."""
+  email_not: String
+
+  """All values that are contained in given list."""
+  email_in: [String!]
+
+  """All values that are not contained in given list."""
+  email_not_in: [String!]
+
+  """All values less than the given value."""
+  email_lt: String
+
+  """All values less than or equal the given value."""
+  email_lte: String
+
+  """All values greater than the given value."""
+  email_gt: String
+
+  """All values greater than or equal the given value."""
+  email_gte: String
+
+  """All values containing the given string."""
+  email_contains: String
+
+  """All values not containing the given string."""
+  email_not_contains: String
+
+  """All values starting with the given string."""
+  email_starts_with: String
+
+  """All values not starting with the given string."""
+  email_not_starts_with: String
+
+  """All values ending with the given string."""
+  email_ends_with: String
+
+  """All values not ending with the given string."""
+  email_not_ends_with: String
   createdAt: DateTime
 
   """All values that are not equal to given value."""
@@ -1830,7 +1824,6 @@ input UserWhereInput {
 
   """All values greater than or equal the given value."""
   updatedAt_gte: DateTime
-  googleInfo: GoogleInfoWhereInput
 }
 
 input UserWhereUniqueInput {

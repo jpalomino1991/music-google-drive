@@ -10,7 +10,7 @@ const oauth2Client = new google.auth.OAuth2(
 );
 
 const scopes = [
-  'https://www.googleapis.com/auth/userinfo.profile',
+  'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/drive.readonly'
 ];
 
@@ -36,51 +36,25 @@ module.exports = server => {
       const { tokens } = await oauth2Client.getToken(code);
       oauth2Client.setCredentials(tokens);
 
-      const plus = google.plus({
-        version: 'v1',
-        auth: oauth2Client
-      });
+      const drive = google.drive({version: 'v3', auth: oauth2Client});
 
       const {
-        data: {
-          id,
-          displayName,
-          image,
-          name,
-          etag,
-          kind,
-          objectType,
-          url,
-          language,
-          verified,
-          isPlusUser
-        }
-      } = await plus.people.get({ userId: 'me' });
+        data: { user }
+      } = await drive.about.get({ fields: 'user' });
 
       let userId;
-      const userFound = await findUserByProviderId(id);
+      console.log(data);
+      const userFound = await findUserByProviderId(data.user.permissionId);
       if (userFound) {
         userId = userFound.id;
       } else {
         const user = await db.mutation.createUser({
           data: {
-            providerId: id,
-            displayName,
-            picture: (image || {}).url,
+            providerId: data.user.permissionId,
+            displayName: data.user.displayName,
+            picture: data.user.photoLink,
             refreshToken: tokens.refresh_token,
-            googleInfo: {
-              create: {
-                etag,
-                familyName: (name || {}).familyName,
-                givenName: (name || {}).givenName,
-                kind,
-                objectType,
-                url,
-                language,
-                isPlusUser,
-                verified
-              }
-            }
+            email: data.user.emailAddress
           }
         });
         userId = user.id;

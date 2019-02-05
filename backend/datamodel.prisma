@@ -22,10 +22,10 @@ type GoogleInfo {
 type User {
   id: ID! @unique
   providerId: String! @unique
-  googleInfo: GoogleInfo! @relation(name: "GoogleInfoByUser" onDelete: CASCADE)
   displayName: String!
   picture: String!
   refreshToken: String!
+  email: String !
   createdAt: DateTime!
   updatedAt: DateTime!
 }
