@@ -36,25 +36,24 @@ module.exports = server => {
       const { tokens } = await oauth2Client.getToken(code);
       oauth2Client.setCredentials(tokens);
 
-      const drive = google.drive({version: 'v3', auth: oauth2Client});
+      const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
       const {
-        data: { user }
+        data: { user: driveUser }
       } = await drive.about.get({ fields: 'user' });
 
       let userId;
-      console.log(data);
-      const userFound = await findUserByProviderId(data.user.permissionId);
+      const userFound = await findUserByProviderId(driveUser.permissionId);
       if (userFound) {
         userId = userFound.id;
       } else {
         const user = await db.mutation.createUser({
           data: {
-            providerId: data.user.permissionId,
-            displayName: data.user.displayName,
-            picture: data.user.photoLink,
+            providerId: driveUser.permissionId,
+            displayName: driveUser.displayName,
+            picture: driveUser.photoLink,
             refreshToken: tokens.refresh_token,
-            email: data.user.emailAddress
+            email: driveUser.emailAddress
           }
         });
         userId = user.id;
