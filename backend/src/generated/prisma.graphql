@@ -1,5 +1,5 @@
 # source: https://us1.prisma.sh/music-drive/music-drive/dev
-# timestamp: Mon Feb 04 2019 16:25:38 GMT-0500 (Hora est. Pacífico, Sudamérica)
+# timestamp: Wed Apr 10 2019 15:51:15 GMT-0500 (Peru Standard Time)
 
 type AggregateGoogleInfo {
   count: Int!
@@ -471,6 +471,8 @@ scalar Long
 type MusicFolder implements Node {
   id: ID!
   folderId: String!
+  totalFiles: Int
+  totalFolders: Int
   name: String!
   iconUrl: String
   createdAt: DateTime!
@@ -490,7 +492,10 @@ type MusicFolderConnection {
 }
 
 input MusicFolderCreateInput {
+  id: ID
   folderId: String!
+  totalFiles: Int
+  totalFolders: Int
   name: String!
   iconUrl: String
   states: StateCreateManyWithoutFolderInput
@@ -503,7 +508,10 @@ input MusicFolderCreateOneWithoutStatesInput {
 }
 
 input MusicFolderCreateWithoutStatesInput {
+  id: ID
   folderId: String!
+  totalFiles: Int
+  totalFolders: Int
   name: String!
   iconUrl: String
   user: UserCreateOneInput!
@@ -523,6 +531,10 @@ enum MusicFolderOrderByInput {
   id_DESC
   folderId_ASC
   folderId_DESC
+  totalFiles_ASC
+  totalFiles_DESC
+  totalFolders_ASC
+  totalFolders_DESC
   name_ASC
   name_DESC
   iconUrl_ASC
@@ -536,6 +548,8 @@ enum MusicFolderOrderByInput {
 type MusicFolderPreviousValues {
   id: ID!
   folderId: String!
+  totalFiles: Int
+  totalFolders: Int
   name: String!
   iconUrl: String
   createdAt: DateTime!
@@ -583,6 +597,8 @@ input MusicFolderSubscriptionWhereInput {
 
 input MusicFolderUpdateInput {
   folderId: String
+  totalFiles: Int
+  totalFolders: Int
   name: String
   iconUrl: String
   states: StateUpdateManyWithoutFolderInput
@@ -591,6 +607,8 @@ input MusicFolderUpdateInput {
 
 input MusicFolderUpdateManyMutationInput {
   folderId: String
+  totalFiles: Int
+  totalFolders: Int
   name: String
   iconUrl: String
 }
@@ -606,6 +624,8 @@ input MusicFolderUpdateOneWithoutStatesInput {
 
 input MusicFolderUpdateWithoutStatesDataInput {
   folderId: String
+  totalFiles: Int
+  totalFolders: Int
   name: String
   iconUrl: String
   user: UserUpdateOneRequiredInput
@@ -705,6 +725,50 @@ input MusicFolderWhereInput {
 
   """All values not ending with the given string."""
   folderId_not_ends_with: String
+  totalFiles: Int
+
+  """All values that are not equal to given value."""
+  totalFiles_not: Int
+
+  """All values that are contained in given list."""
+  totalFiles_in: [Int!]
+
+  """All values that are not contained in given list."""
+  totalFiles_not_in: [Int!]
+
+  """All values less than the given value."""
+  totalFiles_lt: Int
+
+  """All values less than or equal the given value."""
+  totalFiles_lte: Int
+
+  """All values greater than the given value."""
+  totalFiles_gt: Int
+
+  """All values greater than or equal the given value."""
+  totalFiles_gte: Int
+  totalFolders: Int
+
+  """All values that are not equal to given value."""
+  totalFolders_not: Int
+
+  """All values that are contained in given list."""
+  totalFolders_in: [Int!]
+
+  """All values that are not contained in given list."""
+  totalFolders_not_in: [Int!]
+
+  """All values less than the given value."""
+  totalFolders_lt: Int
+
+  """All values less than or equal the given value."""
+  totalFolders_lte: Int
+
+  """All values greater than the given value."""
+  totalFolders_gt: Int
+
+  """All values greater than or equal the given value."""
+  totalFolders_gte: Int
   name: String
 
   """All values that are not equal to given value."""
@@ -931,6 +995,7 @@ type StateConnection {
 }
 
 input StateCreateInput {
+  id: ID
   status: Status!
   extraData: Json
   errorMessage: String
@@ -943,6 +1008,7 @@ input StateCreateManyWithoutFolderInput {
 }
 
 input StateCreateWithoutFolderInput {
+  id: ID
   status: Status!
   extraData: Json
   errorMessage: String
@@ -1370,9 +1436,12 @@ input StateWhereUniqueInput {
 
 enum Status {
   STARTING
-  FETCHING
+  FETCHING_DRIVE
+  UPLOADING_ELASTIC
+  SONGS_UPLOADED
   DOWNLOADING
-  FINISHING
+  UPLOADING_METADATA
+  SONG_METADATA_UPLOADED
   READY
 }
 
@@ -1405,6 +1474,7 @@ type UserConnection {
 }
 
 input UserCreateInput {
+  id: ID
   providerId: String!
   displayName: String!
   picture: String!

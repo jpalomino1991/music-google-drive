@@ -67,63 +67,70 @@ const startProcess = async ({
   end,
   previousProcessedSongs = 0
 }) => {
-  const driveClient = await drive.createClient(refreshToken);
-  const errorStream = fileWriteStream(`./src/temp/error_${folderDriveId}`);
+  try {
+    const driveClient = await drive.createClient(refreshToken);
+    const errorStream = fileWriteStream(`./src/temp/error_${folderDriveId}`);
 
-  const lineReader = new LineReader(`./src/temp/songs_${folderDriveId}`);
-  let songs = [];
-  let lines = -1;
-  let processedSongs = previousProcessedSongs;
-  lineReader.on('line', async line => {
-    lines++;
-    if (lines < start || lines > end) {
-      return;
-    }
-    songs.push(line);
-    if (songs.length === MAX_LINES) {
-      lineReader.pause();
-      const songsWithTags = (await Promise.all(
-        songs.map(async song => ({
-          file: song,
-          tags: await processFile(errorStream, driveClient, JSON.parse(song))
-        }))
-      )).filter(song => song.tags);
-      processedSongs += songsWithTags.length; //MAX_LINES;
-      await elastic.bulkUploadSongs(songsWithTags, providerId);
-      await updateState({
-        counts,
-        processedSongs,
-        newStateId
-      });
-
-      songs = [];
-      await utils.sleep(1500);
-      lineReader.resume();
-    }
-  });
-  return new Promise(resolve => {
-    lineReader.on('end', async () => {
-      if (songs.length) {
+    const lineReader = new LineReader(`./src/temp/songs_${folderDriveId}`);
+    let songs = [];
+    let lines = -1;
+    let processedSongs = previousProcessedSongs;
+    lineReader.on('line', async line => {
+      lines++;
+      if (lines < start || lines > end) {
+        return;
+      }
+      songs.push(line);
+      if (songs.length === MAX_LINES) {
+        lineReader.pause();
         const songsWithTags = (await Promise.all(
           songs.map(async song => ({
             file: song,
             tags: await processFile(errorStream, driveClient, JSON.parse(song))
           }))
         )).filter(song => song.tags);
-        processedSongs += songsWithTags.length;
+        processedSongs += songsWithTags.length; //MAX_LINES;
         await elastic.bulkUploadSongs(songsWithTags, providerId);
+        await updateState({
+          counts,
+          processedSongs,
+          newStateId
+        });
+
+        songs = [];
+        await utils.sleep(1500);
+        lineReader.resume();
       }
-      processedSongs += songsWithTags.length;
-      await updateState({
-        counts,
-        processedSongs,
-        newStateId
-      });
-      errorStream.end();
-      console.log('close file');
-      resolve();
     });
-  });
+    return new Promise(resolve => {
+      lineReader.on('end', async () => {
+        if (songs.length) {
+          const songsWithTags = (await Promise.all(
+            songs.map(async song => ({
+              file: song,
+              tags: await processFile(
+                errorStream,
+                driveClient,
+                JSON.parse(song)
+              )
+            }))
+          )).filter(song => song.tags);
+          processedSongs += songsWithTags.length;
+          await elastic.bulkUploadSongs(songsWithTags, providerId);
+        }
+        processedSongs += songsWithTags.length;
+        await updateState({
+          counts,
+          processedSongs,
+          newStateId
+        });
+        errorStream.end();
+        resolve();
+      });
+    });
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 const generateRange = (end, blockSize) => {
@@ -158,7 +165,7 @@ module.exports = async ({
     }
   });
   const ranges = generateRange(counts.files, BLOCK_SIZE);
-  await Promise.each(ranges, ({ start, end }, i) =>
+  return Promise.each(ranges, ({ start, end }, i) =>
     startProcess({
       providerId,
       refreshToken,

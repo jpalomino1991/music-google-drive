@@ -53,7 +53,7 @@ module.exports = async ({ driveClient, folderDriveId, folderId }) => {
   const foldersStream = fileWriteStream(`./src/temp/folders_${folderDriveId}`);
   const newState = await db.mutation.createState({
     data: {
-      status: 'FETCHING',
+      status: 'FETCHING_DRIVE',
       folder: {
         connect: {
           id: folderId

@@ -15,28 +15,52 @@ const options = {
 
 const client = require('elasticsearch').Client(options);
 
-const header = {
+const songHeader = {
   index: {
-    _index: 'music',
-    _type: 'song'
+    _index: 'songs',
+    _type: '_doc'
   }
 };
+
+const removeFileExtension = fileName => fileName.replace(/\.[^\.]+$/, '');
+
+const folderHeader = {
+  index: {
+    _index: 'folders',
+    _type: '_doc'
+  }
+};
+
+module.exports.bulkUploadFolders = (folders, providerId) =>
+  client.bulk({
+    body: R.compose(
+      R.insert(0, folderHeader),
+      R.intersperse(folderHeader),
+      R.map(({ id, name, parent }) => ({
+        providerId,
+        driveId: id,
+        title: name,
+        parentId: parent
+      }))
+    )(folders)
+  });
 
 module.exports.bulkUploadSongs = (songs, providerId) =>
   client.bulk({
     body: R.compose(
-      R.insert(0, header),
-      R.intersperse(header),
-      R.map(({ file, tags }) => ({
-        parentId: file.parent,
+      R.insert(0, songHeader),
+      R.intersperse(songHeader),
+      R.map(({ id, name, parent, webContentLink, tags = {} }) => ({
+        driveId: id,
+        parentId: parent,
         providerId,
-        file: file.name,
-        title: tags.title || file.name,
+        file: name,
+        title: tags.title || removeFileExtension(name),
         artist: tags.artist,
         album: tags.album,
         year: tags.year,
         genre: tags.genre,
-        link: file.webContentLink,
+        link: webContentLink,
         image: ''
       }))
     )(songs)
@@ -70,12 +94,59 @@ const createIndexIfNotExists = async index => {
   }
 };
 
-const setup = async () => {
+const parseItem = ({ _index: type, _source }) => ({
+  type,
+  id: _source.driveId,
+  ..._source
+});
+
+module.exports.getItem = async driveId => {
   try {
-    await createIndexIfNotExists('music');
+    const response = await client.search({
+      index: '_all',
+      body: {
+        query: {
+          match: {
+            driveId
+          }
+        }
+      }
+    });
+    return parseItem(response.hits.hits[0]);
+  } catch (e) {
+    return undefined;
+  }
+};
+
+module.exports.getChildren = async parentId => {
+  const response = await client.search({
+    index: '_all',
+    body: {
+      query: {
+        match: {
+          parentId
+        }
+      }
+    }
+  });
+
+  return R.map(parseItem)(response.hits.hits);
+};
+
+module.exports.setup = async () => {
+  /*
+  await client.indices.delete({
+    index: '_all'
+  });
+  console.log('deleted');
+  return;
+
+   */
+
+  try {
+    await createIndexIfNotExists('songs');
+    await createIndexIfNotExists('folders');
   } catch (e) {
     console.log(e);
   }
 };
-
-setup();

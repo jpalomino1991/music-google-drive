@@ -1,12 +1,30 @@
 # import * from './generated/prisma.graphql'
 
+type Item {
+  id: ID!
+  type: String!
+  driveId: String!
+  providerId: String!
+  title: String!
+  parentId: String!
+  file: String
+  artist: String
+  album: String
+  year: String
+  genre: String
+  link: String
+  image: String
+}
+
 type Query {
   me: User
   folders: [MusicFolder!]
+  items(parentId: String): [Item!]
+  item(id: String): Item
 }
 
 type Mutation {
-  createFolder(folderId: String name: String! iconUrl: String): MusicFolder
+  createFolder(folderId: String, name: String!, iconUrl: String): MusicFolder
 }
 
 type User {

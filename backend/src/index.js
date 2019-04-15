@@ -1,12 +1,12 @@
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const elastic = require('./tasks/elastic')
 
+const elastic = require('./tasks/elastic');
 const createServer = require('./createServer');
-const db = require('./db');
 const auth = require('./auth');
 
+elastic.setup();
 const server = createServer();
 
 server.express.use(cookieParser());

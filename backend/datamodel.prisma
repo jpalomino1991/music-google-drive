@@ -1,8 +1,11 @@
 enum Status {
   STARTING
-  FETCHING
+  FETCHING_DRIVE
+  UPLOADING_ELASTIC
+  SONGS_UPLOADED
   DOWNLOADING
-  FINISHING
+  UPLOADING_METADATA
+  SONG_METADATA_UPLOADED
   READY
 }
 
@@ -33,6 +36,8 @@ type User {
 type MusicFolder {
   id: ID! @unique
   folderId: String!
+  totalFiles: Int
+  totalFolders: Int
   name: String!
   iconUrl: String
   createdAt: DateTime!

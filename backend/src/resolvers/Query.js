@@ -1,3 +1,5 @@
+const elastic = require('../tasks/elastic');
+
 const Query = {
   me(parent, args, ctx, info) {
     if (!ctx.request.userId) {
@@ -30,6 +32,20 @@ const Query = {
       },
       info
     );
+  },
+  item(parent, args, ctx, info) {
+    return elastic.getItem(args.id);
+  },
+  items(
+    parent,
+    args,
+    {
+      request: { userId }
+    },
+    info
+  ) {
+    //if (!userId) throw new Error('You must be signin.');
+    return elastic.getChildren(args.parentId);
   }
 };
 
