@@ -51,7 +51,7 @@ module.exports = server => {
           data: {
             providerId: driveUser.permissionId,
             displayName: driveUser.displayName,
-            picture: driveUser.photoLink,
+            picture: driveUser.photoLink || 'image not found',
             refreshToken: tokens.refresh_token,
             email: driveUser.emailAddress
           }
