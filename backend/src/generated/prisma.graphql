@@ -1,5 +1,5 @@
-# source: https://us1.prisma.sh/music-drive/music-drive/dev
-# timestamp: Wed Apr 10 2019 15:51:15 GMT-0500 (Peru Standard Time)
+# source: https://prod-drive-music-27ae0599f5.herokuapp.com/prod-drive-music/prod
+# timestamp: Mon Apr 15 2019 18:18:46 GMT-0500 (Peru Standard Time)
 
 type AggregateGoogleInfo {
   count: Int!
@@ -492,7 +492,6 @@ type MusicFolderConnection {
 }
 
 input MusicFolderCreateInput {
-  id: ID
   folderId: String!
   totalFiles: Int
   totalFolders: Int
@@ -508,7 +507,6 @@ input MusicFolderCreateOneWithoutStatesInput {
 }
 
 input MusicFolderCreateWithoutStatesInput {
-  id: ID
   folderId: String!
   totalFiles: Int
   totalFolders: Int
@@ -995,7 +993,6 @@ type StateConnection {
 }
 
 input StateCreateInput {
-  id: ID
   status: Status!
   extraData: Json
   errorMessage: String
@@ -1008,7 +1005,6 @@ input StateCreateManyWithoutFolderInput {
 }
 
 input StateCreateWithoutFolderInput {
-  id: ID
   status: Status!
   extraData: Json
   errorMessage: String
@@ -1253,7 +1249,6 @@ input StateUpdateManyMutationInput {
 input StateUpdateManyWithoutFolderInput {
   create: [StateCreateWithoutFolderInput!]
   connect: [StateWhereUniqueInput!]
-  set: [StateWhereUniqueInput!]
   disconnect: [StateWhereUniqueInput!]
   delete: [StateWhereUniqueInput!]
   update: [StateUpdateWithWhereUniqueWithoutFolderInput!]
@@ -1474,7 +1469,6 @@ type UserConnection {
 }
 
 input UserCreateInput {
-  id: ID
   providerId: String!
   displayName: String!
   picture: String!

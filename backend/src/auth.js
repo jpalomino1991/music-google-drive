@@ -64,14 +64,14 @@ module.exports = server => {
         },
         process.env.JWT_SECRET,
         {
-          expiresIn: '3h'
+          expiresIn: '24h'
         }
       );
       res.cookie('token', token, {
         //httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 3 //3 hours
+        maxAge: 1000 * 60 * 60 * 24 //24 hours
       });
-      res.redirect(301, process.env.FRONTEND_SUCCESS_URL);
+      res.redirect(301, process.env.FRONTEND_URL);
     } catch (e) {
       console.log(e);
     }
