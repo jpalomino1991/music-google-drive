@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.js",
+    "start": "pm2 start src/index.js",
     "dev": "nodemon -e js,graphql -x node --inspect src/index.js",
     "prisma-deploy": "prisma deploy --env-file .env",
     "precommit": "lint-staged"
@@ -36,6 +36,7 @@
     "music-metadata": "^3.5.0",
     "node-id3": "^0.1.7",
     "nodemon": "^1.18.9",
+    "pm2": "^3.5.0",
     "prettier": "^1.15.3",
     "prisma": "^1.30.0",
     "prisma-binding": "^2.2.12",

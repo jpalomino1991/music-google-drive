@@ -1,5 +1,4 @@
 endpoint: ${env:PRISMA_ENDPOINT}
-#endpoint: https://prod-drive-music-27ae0599f5.herokuapp.com/prod-drive-music/prod
 datamodel: datamodel.prisma
 hooks:
   post-deploy:
