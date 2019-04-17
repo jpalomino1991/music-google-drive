@@ -44,8 +44,7 @@ const AudioControls = ({
     if (!audio) audio = new Audio();
     if (!song) return;
     if (audio) pause();
-    audio.onloadedmetadata = e => console.log("meta", e);
-    audio.onloadeddata = e => console.log("data", e);
+    audio.onloadedmetadata = e => updateDuration(audio.duration);
     audio.src = song.link;
     audio.play().then(() => togglePlaying(true));
   }, [song]);
@@ -63,7 +62,9 @@ const AudioControls = ({
   };
   return (
     <Flex flexDirection="column" pt={4}>
-      <div>{song.title}</div>
+      <div>
+        {song.title} {duration}
+      </div>
       <Flex justifyContent="center" alignItems="center" pt={3}>
         <IconButton name="random" mx={3} />
         <IconButton
