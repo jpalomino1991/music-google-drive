@@ -3,7 +3,6 @@
 type Item {
   id: ID!
   type: String!
-  driveId: String!
   providerId: String!
   title: String!
   parentId: String!

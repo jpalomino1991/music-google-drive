@@ -15,54 +15,58 @@ const options = {
 
 const client = require('elasticsearch').Client(options);
 
-const songHeader = {
+const songHeader = _id => ({
   index: {
     _index: 'songs',
-    _type: '_doc'
+    _type: '_doc',
+    _id
   }
-};
+});
 
 const removeFileExtension = fileName => fileName.replace(/\.[^\.]+$/, '');
 
-const folderHeader = {
+const folderHeader = _id => ({
   index: {
     _index: 'folders',
-    _type: '_doc'
+    _type: '_doc',
+    _id
   }
-};
+});
 
 module.exports.bulkUploadFolders = (folders, providerId) =>
   client.bulk({
     body: R.compose(
-      R.insert(0, folderHeader),
-      R.intersperse(folderHeader),
-      R.map(({ id, name, parent }) => ({
-        providerId,
-        driveId: id,
-        title: name,
-        parentId: parent
-      }))
+      R.flatten,
+      R.map(({ id, name, parent }) => [
+        folderHeader(id),
+        {
+          providerId,
+          title: name,
+          parentId: parent
+        }
+      ])
     )(folders)
   });
 
 module.exports.bulkUploadSongs = (songs, providerId) =>
   client.bulk({
     body: R.compose(
-      R.insert(0, songHeader),
-      R.intersperse(songHeader),
-      R.map(({ id, name, parent, webContentLink, tags = {} }) => ({
-        driveId: id,
-        parentId: parent,
-        providerId,
-        file: name,
-        title: tags.title || removeFileExtension(name),
-        artist: tags.artist,
-        album: tags.album,
-        year: tags.year,
-        genre: tags.genre,
-        link: webContentLink,
-        image: ''
-      }))
+      R.flatten,
+      R.map(({ id, name, parent, webContentLink, tags = {} }) => [
+        songHeader(id),
+        {
+          parentId: parent,
+          providerId,
+          file: name,
+          title: tags.title || removeFileExtension(name),
+          artist: tags.artist,
+          album: tags.album,
+          year: tags.year,
+          genre: tags.genre,
+          link: webContentLink,
+          image: ''
+        }
+      ])
     )(songs)
   });
 
@@ -94,20 +98,20 @@ const createIndexIfNotExists = async index => {
   }
 };
 
-const parseItem = ({ _index: type, _source }) => ({
+const parseItem = ({ _index: type, _id: id, _source }) => ({
   type,
-  id: _source.driveId,
+  id,
   ..._source
 });
 
-module.exports.getItem = async driveId => {
+module.exports.getItem = async id => {
   try {
     const response = await client.search({
       index: '_all',
       body: {
         query: {
           match: {
-            driveId
+            _id: id
           }
         }
       }
