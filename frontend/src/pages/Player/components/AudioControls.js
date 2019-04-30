@@ -28,8 +28,10 @@ const PREVIOUS_SONG = gql`
   }
 `;
 
-let audio;
+const getUrl = (id, token) => `${id}&access_token=${token}`;
 
+let audio = new Audio();
+let loaded = false;
 const AudioControls = ({
   data: { songQueue, currentIndexSong },
   nextSong,
@@ -41,13 +43,20 @@ const AudioControls = ({
   const [duration, updateDuration] = useState(undefined);
 
   useEffect(() => {
-    if (!audio) audio = new Audio();
     if (!song) return;
-    if (audio) pause();
-    audio.onloadedmetadata = e => updateDuration(audio.duration);
-    audio.src = song.link;
-    audio.play().then(() => togglePlaying(true));
+    const loadSong = async () => {
+      audio.pause();
+      const res = await fetch(process.env.REACT_APP_BACKEND_URL + "/tokens", {
+        credentials: "include"
+      });
+      const { access_token } = await res.json();
+      audio.src = getUrl(song.link, access_token);
+      audio.onloadedmetadata = e => updateDuration(audio.duration);
+      audio.play().then(() => togglePlaying(true));
+    };
+    loadSong();
   }, [song]);
+
   const pause = () => {
     if (playing) {
       audio.pause();
