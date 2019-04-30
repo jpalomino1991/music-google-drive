@@ -33,7 +33,7 @@ const fetchDrive = async (
     const isFolderType = drive.isFolder(item);
     if (isFolderType) {
       foldersStream.write({ ...item, parent: id });
-      console.log('folder', item);
+      console.log('folder', item.title);
       return await fetchDrive(
         {
           songsStream,
@@ -43,7 +43,7 @@ const fetchDrive = async (
         item.id
       );
     }
-    console.log('file', item);
+    console.log('file', item.title);
     songsStream.write({ ...item, parent: id });
   });
 };
