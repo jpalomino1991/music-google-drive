@@ -13,7 +13,7 @@ const fetchDrive = async (
   pageToken
 ) => {
   await utils.sleep(1000);
-  const { token, files = [] } = await drive.fetchFolderContent({
+  const { token, items = [] } = await drive.fetchFolderContent({
     driveClient,
     parentId: id,
     pageToken
@@ -29,7 +29,7 @@ const fetchDrive = async (
       token
     );
   }
-  return await Promise.each(files, async item => {
+  return await Promise.each(items, async item => {
     const isFolderType = drive.isFolder(item);
     if (isFolderType) {
       foldersStream.write({ ...item, parent: id });

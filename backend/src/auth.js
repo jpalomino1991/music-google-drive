@@ -62,14 +62,11 @@ module.exports = server => {
         {
           userId
         },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: '24h'
-        }
+        process.env.JWT_SECRET
       );
       res.cookie('token', token, {
         //httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 //24 hours
+        maxAge: 1000 * 60 * 60 * 24 * 365 //1 year
       });
       res.redirect(301, process.env.FRONTEND_URL);
     } catch (e) {

@@ -37,12 +37,12 @@ module.exports.bulkUploadFolders = (folders, providerId) =>
   client.bulk({
     body: R.compose(
       R.flatten,
-      R.map(({ id, name, parent }) => [
+      R.map(({ id, title, parents }) => [
         folderHeader(id),
         {
           providerId,
-          title: name,
-          parentId: parent
+          title,
+          parentId: parents[0].id
         }
       ])
     )(folders)
@@ -52,18 +52,18 @@ module.exports.bulkUploadSongs = (songs, providerId) =>
   client.bulk({
     body: R.compose(
       R.flatten,
-      R.map(({ id, name, parent, webContentLink, tags = {} }) => [
+      R.map(({ id, title, parents, downloadUrl, tags = {} }) => [
         songHeader(id),
         {
-          parentId: parent,
+          parentId: parents[0].id,
           providerId,
-          file: name,
-          title: tags.title || removeFileExtension(name),
+          file: title,
+          title: tags.title || removeFileExtension(title),
           artist: tags.artist,
           album: tags.album,
           year: tags.year,
           genre: tags.genre,
-          link: webContentLink,
+          link: downloadUrl,
           image: ''
         }
       ])

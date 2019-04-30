@@ -9,11 +9,17 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_REDIRECT_URL
 );
 
-module.exports.createClient = async refreshToken => {
+const generateTokens = async refreshToken => {
   const { tokens } = await oauth2Client.refreshToken(refreshToken);
+  return tokens;
+};
+
+module.exports.generateTokens = generateTokens;
+
+module.exports.createClient = async refreshToken => {
   oauth2Client.setCredentials(tokens);
   const drive = google.drive({
-    version: 'v3',
+    version: 'v2',
     auth: oauth2Client
   });
   return drive;
@@ -65,8 +71,6 @@ module.exports.fetchFolderContent = async ({
     q: `'${parentId}' in parents and (fileExtension = 'mp3' or fileExtension = 'flac' or mimeType = 'application/vnd.google-apps.folder')`,
     includeTeamDriveItems: true,
     supportsTeamDrives: true,
-    fields:
-      'nextPageToken, files(id, name, kind, folderColorRgb, fileExtension, mimeType, parents, webContentLink)',
     spaces: 'drive',
     pageToken,
     pageSize: PAGE_SIZE
