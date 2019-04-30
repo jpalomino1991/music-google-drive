@@ -17,6 +17,7 @@ const generateTokens = async refreshToken => {
 module.exports.generateTokens = generateTokens;
 
 module.exports.createClient = async refreshToken => {
+  const tokens = generateTokens(refreshToken);
   oauth2Client.setCredentials(tokens);
   const drive = google.drive({
     version: 'v2',
