@@ -25,6 +25,8 @@ const UPDATE_SONG_QUEUE = gql`
   }
 `;
 
+const byTitle = (a, b) => (a.title > b.title ? 1 : -1);
+
 const Items = ({ id }) => {
   return (
     <Mutation mutation={UPDATE_SONG_QUEUE}>
@@ -34,7 +36,7 @@ const Items = ({ id }) => {
             if (loading) return <div>loading</div>;
             return (
               <div>
-                {data.items.map((item, i) => (
+                {data.items.sort(byTitle).map((item, i) => (
                   <div key={item.id}>
                     {item.type === "folders" ? (
                       <Folder {...item} />
