@@ -87,14 +87,25 @@ const parseItem = ({ _index: type, _id: id, _source }) => ({
   ..._source
 });
 
-module.exports.getItem = async id => {
+module.exports.getItem = async (id, providerId) => {
   try {
     const response = await client.search({
       index: '_all',
       body: {
         query: {
-          match: {
-            driveId: id
+          bool: {
+            must: [
+              {
+                match: {
+                  driveId: id
+                }
+              },
+              {
+                match: {
+                  providerId
+                }
+              }
+            ]
           }
         }
       }
@@ -105,15 +116,26 @@ module.exports.getItem = async id => {
   }
 };
 
-module.exports.getChildren = async parentId => {
+module.exports.getChildren = async (parentId, providerId) => {
   const response = await client.search({
     index: '_all',
     body: {
       from: 0,
       size: 100,
       query: {
-        match: {
-          parentId
+        bool: {
+          must: [
+            {
+              match: {
+                parentId
+              }
+            },
+            {
+              match: {
+                providerId
+              }
+            }
+          ]
         }
       }
     }

@@ -33,19 +33,27 @@ const Query = {
       info
     );
   },
-  item(parent, args, ctx, info) {
-    return elastic.getItem(args.id);
+  item(
+    parent,
+    args,
+    {
+      request: { providerId, userId }
+    },
+    info
+  ) {
+    if (!userId) throw new Error('You must be signin.');
+    return elastic.getItem(args.id, providerId);
   },
   items(
     parent,
     args,
     {
-      request: { userId }
+      request: { userId, providerId }
     },
     info
   ) {
     if (!userId) throw new Error('You must be signin.');
-    return elastic.getChildren(args.parentId);
+    return elastic.getChildren(args.parentId, providerId);
   }
 };
 
