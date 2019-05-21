@@ -15,31 +15,30 @@ const options = {
 
 const client = require('elasticsearch').Client(options);
 
-const songHeader = _id => ({
+const songHeader = {
   index: {
     _index: 'songs',
-    _type: '_doc',
-    _id
+    _type: '_doc'
   }
-});
+};
 
 const removeFileExtension = fileName => fileName.replace(/\.[^\.]+$/, '');
 
-const folderHeader = _id => ({
+const folderHeader = {
   index: {
     _index: 'folders',
-    _type: '_doc',
-    _id
+    _type: '_doc'
   }
-});
+};
 
 module.exports.bulkUploadFolders = (folders, providerId) =>
   client.bulk({
     body: R.compose(
       R.flatten,
       R.map(({ id, title, parents }) => [
-        folderHeader(id),
+        folderHeader,
         {
+          driveId: id,
           providerId,
           title,
           parentId: parents[0].id
@@ -53,9 +52,10 @@ module.exports.bulkUploadSongs = (songs, providerId) =>
     body: R.compose(
       R.flatten,
       R.map(({ id, title, parents, downloadUrl, tags = {} }) => [
-        songHeader(id),
+        songHeader,
         {
           parentId: parents[0].id,
+          driveId: id,
           providerId,
           file: title,
           title: tags.title || removeFileExtension(title),
@@ -70,23 +70,6 @@ module.exports.bulkUploadSongs = (songs, providerId) =>
     )(songs)
   });
 
-module.exports.uploadSong = (file, metadata) => {
-  return client.index({
-    index: 'music',
-    type: 'song',
-    body: {
-      file: file.name,
-      title: metadata.title,
-      artist: metadata.artist,
-      album: metadata.album,
-      year: metadata.year,
-      genre: metadata.genre,
-      link: file.webContentLink,
-      image: ''
-    }
-  });
-};
-
 const createIndexIfNotExists = async index => {
   const exists = await client.indices.exists({
     index
@@ -100,7 +83,7 @@ const createIndexIfNotExists = async index => {
 
 const parseItem = ({ _index: type, _id: id, _source }) => ({
   type,
-  id,
+  id: _source.driveId,
   ..._source
 });
 
@@ -111,7 +94,7 @@ module.exports.getItem = async id => {
       body: {
         query: {
           match: {
-            _id: id
+            driveId: id
           }
         }
       }
@@ -126,6 +109,8 @@ module.exports.getChildren = async parentId => {
   const response = await client.search({
     index: '_all',
     body: {
+      from: 0,
+      size: 100,
       query: {
         match: {
           parentId
