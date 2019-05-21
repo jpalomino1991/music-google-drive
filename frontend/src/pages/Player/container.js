@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createContainer } from "unstated-next";
 
-const generateRandom = max => Math.random() * max;
+const generateRandom = max => Math.round(Math.random() * max);
 
 let repeat = false;
 
