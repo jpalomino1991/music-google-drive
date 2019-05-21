@@ -5,6 +5,8 @@ import { graphql, compose } from "react-apollo";
 
 import { IconButton } from "../../../components";
 
+const generateRandom = max => Math.random() * max;
+
 const SONG = gql`
   query player {
     currentIndexSong @client
@@ -31,7 +33,6 @@ const PREVIOUS_SONG = gql`
 const getUrl = (id, token) => `${id}&access_token=${token}`;
 
 let audio = new Audio();
-let loaded = false;
 const AudioControls = ({
   data: { songQueue, currentIndexSong },
   nextSong,
@@ -51,7 +52,7 @@ const AudioControls = ({
       });
       const { access_token } = await res.json();
       audio.src = getUrl(song.link, access_token);
-      audio.onloadedmetadata = e => updateDuration(audio.duration);
+      audio.onloadedmetadata = _ => updateDuration(audio.duration);
       audio.play().then(() => togglePlaying(true));
     };
     loadSong();

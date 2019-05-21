@@ -1,5 +1,5 @@
 import React from "react";
-import { Query, Mutation } from "react-apollo";
+import { Query } from "react-apollo";
 import gql from "graphql-tag";
 
 import Folder from "./Folder";
@@ -18,51 +18,40 @@ const FETCH_ITEMS = gql`
   }
 `;
 
-const UPDATE_SONG_QUEUE = gql`
-  mutation updateSongQueue($songQueue: [Song], $currentIndexSong: Int) {
-    updateSongQueue(songQueue: $songQueue, currentIndexSong: $currentIndexSong)
-      @client
-  }
-`;
-
 const byTitle = (a, b) => (a.title > b.title ? 1 : -1);
 
 const Items = ({ id }) => {
   return (
-    <Mutation mutation={UPDATE_SONG_QUEUE}>
-      {updateSongQueue => (
-        <Query query={FETCH_ITEMS} variables={{ id }}>
-          {({ loading, data }) => {
-            if (loading) return <div>loading</div>;
-            return (
-              <div>
-                {data.items.sort(byTitle).map((item, i) => (
-                  <div key={item.id}>
-                    {item.type === "folders" ? (
-                      <Folder {...item} />
-                    ) : (
-                      <Song
-                        onClick={() =>
-                          updateSongQueue({
-                            variables: {
-                              songQueue: data.items.filter(
-                                item => item.type !== "folders"
-                              ),
-                              currentIndexSong: i
-                            }
-                          })
+    <Query query={FETCH_ITEMS} variables={{ id }}>
+      {({ loading, data }) => {
+        if (loading) return <div>loading</div>;
+        return (
+          <div>
+            {data.items.sort(byTitle).map((item, i) => (
+              <div key={item.id}>
+                {item.type === "folders" ? (
+                  <Folder {...item} />
+                ) : (
+                  <Song
+                    onClick={() =>
+                      updateSongQueue({
+                        variables: {
+                          songQueue: data.items.filter(
+                            item => item.type !== "folders"
+                          ),
+                          currentIndexSong: i
                         }
-                        {...item}
-                      />
-                    )}
-                  </div>
-                ))}
+                      })
+                    }
+                    {...item}
+                  />
+                )}
               </div>
-            );
-          }}
-        </Query>
-      )}
-    </Mutation>
+            ))}
+          </div>
+        );
+      }}
+    </Query>
   );
 };
 

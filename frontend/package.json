@@ -9,7 +9,6 @@
     "apollo-link": "^1.2.11",
     "apollo-link-error": "^1.1.10",
     "apollo-link-http": "^1.5.14",
-    "apollo-link-state": "^0.4.2",
     "craco-workbox": "^0.1.0",
     "dotenv": "^7.0.0",
     "graphql": "^14.2.1",
