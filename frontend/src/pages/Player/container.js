@@ -17,6 +17,7 @@ const usePlaylist = () => {
   };
 
   const randomSong = () => {
+    if (songQueue.length === 1) return;
     let nextIndex;
     while (true) {
       nextIndex = generateRandom(songQueue.length - 1);
