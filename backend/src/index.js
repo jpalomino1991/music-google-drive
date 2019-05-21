@@ -17,8 +17,9 @@ server.express.use(cookieParser());
 server.express.use(async (req, res, next) => {
   const { token } = req.cookies;
   if (token) {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+    const { userId, providerId } = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = userId;
+    req.providerId = providerId;
   }
   next();
 });

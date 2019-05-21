@@ -43,9 +43,11 @@ module.exports = server => {
       } = await drive.about.get({ fields: 'user' });
 
       let userId;
+      let providerId;
       const userFound = await findUserByProviderId(driveUser.permissionId);
       if (userFound) {
         userId = userFound.id;
+        providerId = userFound.providerId;
       } else {
         const user = await db.mutation.createUser({
           data: {
@@ -57,10 +59,12 @@ module.exports = server => {
           }
         });
         userId = user.id;
+        providerId = user.providerId;
       }
       const token = jwt.sign(
         {
-          userId
+          userId,
+          providerId
         },
         process.env.JWT_SECRET
       );
