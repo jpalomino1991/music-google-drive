@@ -44,7 +44,7 @@ const Query = {
     },
     info
   ) {
-    //if (!userId) throw new Error('You must be signin.');
+    if (!userId) throw new Error('You must be signin.');
     return elastic.getChildren(args.parentId);
   }
 };
