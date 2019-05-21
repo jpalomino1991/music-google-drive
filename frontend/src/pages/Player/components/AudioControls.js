@@ -1,45 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Flex } from "rebass";
-import gql from "graphql-tag";
-import { graphql, compose } from "react-apollo";
+import { Subscribe } from "unstated";
 
+import PlayerContainer from "../container";
 import { IconButton } from "../../../components";
-
-const generateRandom = max => Math.random() * max;
-
-const SONG = gql`
-  query player {
-    currentIndexSong @client
-    songQueue @client {
-      id
-      title
-      link
-    }
-  }
-`;
-
-const NEXT_SONG = gql`
-  mutation nextSong {
-    nextSong @client
-  }
-`;
-
-const PREVIOUS_SONG = gql`
-  mutation previousSong {
-    previousSong @client
-  }
-`;
 
 const getUrl = (id, token) => `${id}&access_token=${token}`;
 
 let audio = new Audio();
-const AudioControls = ({
-  data: { songQueue, currentIndexSong },
-  nextSong,
-  previousSong
-}) => {
-  const song = songQueue[currentIndexSong];
+
+const AudioControlsContainer = () => {
+  return (
+    <Subscribe to={[PlayerContainer]}>
+      {player => <AudioControls player={player} />}
+    </Subscribe>
+  );
+};
+
+const AudioControls = ({ player }) => {
+  const song = player.state.songQueue[player.state.currentIndex];
   if (!song) return null;
+
   const [playing, togglePlaying] = useState(false);
   const [duration, updateDuration] = useState(undefined);
 
@@ -53,6 +34,7 @@ const AudioControls = ({
       const { access_token } = await res.json();
       audio.src = getUrl(song.link, access_token);
       audio.onloadedmetadata = _ => updateDuration(audio.duration);
+      audio.onended = _ => player.nextQueueSong();
       audio.play().then(() => togglePlaying(true));
     };
     loadSong();
@@ -76,33 +58,19 @@ const AudioControls = ({
         {song.title} {duration}
       </div>
       <Flex justifyContent="center" alignItems="center" pt={3}>
-        <IconButton name="random" mx={3} />
-        <IconButton
-          name="backward"
-          mx={3}
-          onClick={currentIndexSong !== 0 ? previousSong : () => null}
-        />
+        <IconButton name="random" mx={3} onClick={player.randomSong} />
+        <IconButton name="backward" mx={3} onClick={player.previousSong} />
         <IconButton
           name={playing ? "pause" : "play"}
           mx={3}
           fontSize={5}
           onClick={playing ? pause : play}
         />
-        <IconButton
-          name="forward"
-          mx={3}
-          onClick={
-            currentIndexSong + 1 !== songQueue.length ? nextSong : () => null
-          }
-        />
-        <IconButton name="redo" mx={3} />
+        <IconButton name="forward" mx={3} onClick={player.nextSong} />
+        <IconButton name="redo" mx={3} onClick={player.changeRepeatStatus} />
       </Flex>
     </Flex>
   );
 };
 
-export default compose(
-  graphql(SONG),
-  graphql(NEXT_SONG, { name: "nextSong" }),
-  graphql(PREVIOUS_SONG, { name: "previousSong" })
-)(AudioControls);
+export default AudioControlsContainer;
