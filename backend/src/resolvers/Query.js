@@ -7,7 +7,7 @@ const Query = {
     }
     return ctx.db.query.user(
       {
-        where: { id: ctx.request.userId }
+        where: { id: ctx.request.userId },
       },
       info
     );
@@ -17,7 +17,7 @@ const Query = {
     args,
     {
       db,
-      request: { userId }
+      request: { userId },
     },
     info
   ) {
@@ -26,9 +26,9 @@ const Query = {
       {
         where: {
           user: {
-            id: userId
-          }
-        }
+            id: userId,
+          },
+        },
       },
       info
     );
@@ -37,7 +37,7 @@ const Query = {
     parent,
     args,
     {
-      request: { providerId, userId }
+      request: { providerId, userId },
     },
     info
   ) {
@@ -48,13 +48,13 @@ const Query = {
     parent,
     args,
     {
-      request: { userId, providerId }
+      request: { userId, providerId },
     },
     info
   ) {
     if (!userId) throw new Error('You must be signin.');
     return elastic.getChildren(args.parentId, providerId);
-  }
+  },
 };
 
 module.exports = Query;
