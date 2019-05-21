@@ -3,7 +3,7 @@ import { createContainer } from "unstated-next";
 
 const generateRandom = max => Math.random() * max;
 
-let repeat = true;
+let repeat = false;
 
 const usePlaylist = () => {
   const [repeatOne, setRepeatOne] = useState(repeat);
