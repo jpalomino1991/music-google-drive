@@ -1,28 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Flex } from "rebass";
-import { Subscribe } from "unstated";
 
-import PlayerContainer from "../container";
+import Player from "../container";
 import { IconButton } from "../../../components";
 
 const getUrl = (id, token) => `${id}&access_token=${token}`;
 
 let audio = new Audio();
 
-const AudioControlsContainer = () => {
-  return (
-    <Subscribe to={[PlayerContainer]}>
-      {player => <AudioControls player={player} />}
-    </Subscribe>
-  );
-};
-
-const AudioControls = ({ player }) => {
-  const song = player.state.songQueue[player.state.currentIndex];
-  if (!song) return null;
-
+const AudioControls = () => {
+  const player = Player.useContainer();
   const [playing, togglePlaying] = useState(false);
   const [duration, updateDuration] = useState(undefined);
+
+  const song = player.state.songQueue[player.state.currentIndex];
 
   useEffect(() => {
     if (!song) return;
@@ -52,6 +43,9 @@ const AudioControls = ({ player }) => {
       togglePlaying(true);
     }
   };
+
+  if (!song) return null;
+
   return (
     <Flex flexDirection="column" pt={4}>
       <div>
@@ -67,10 +61,28 @@ const AudioControls = ({ player }) => {
           onClick={playing ? pause : play}
         />
         <IconButton name="forward" mx={3} onClick={player.nextSong} />
-        <IconButton name="redo" mx={3} onClick={player.changeRepeatStatus} />
+        <IconButton
+          style={{ position: "relative" }}
+          name="redo"
+          mx={3}
+          onClick={player.changeRepeatStatus}
+        >
+          {player.state.repeatOne && (
+            <div
+              style={{
+                position: "absolute",
+                color: "white",
+                top: "20%",
+                right: "5px"
+              }}
+            >
+              1
+            </div>
+          )}
+        </IconButton>
       </Flex>
     </Flex>
   );
 };
 
-export default AudioControlsContainer;
+export default AudioControls;

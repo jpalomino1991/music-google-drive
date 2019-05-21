@@ -1,67 +1,80 @@
-import { Container } from "unstated";
+import { useState } from "react";
+import { createContainer } from "unstated-next";
 
 const generateRandom = max => Math.random() * max;
 
-class Player extends Container {
-  state = {
-    repeatOne: false,
-    repeatAll: true,
-    currentIndex: -1,
-    songQueue: []
+let repeat = true;
+
+const usePlaylist = () => {
+  const [repeatOne, setRepeatOne] = useState(repeat);
+  const [repeatAll, setRepeatAll] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [songQueue, setSongQueue] = useState([]);
+
+  const initialize = ({ songQueue, currentIndex }) => {
+    setSongQueue(songQueue);
+    setCurrentIndex(currentIndex);
   };
 
-  setup({ songQueue, currentIndex }) {
-    this.setState({
-      songQueue,
-      currentIndex
-    });
-  }
-
-  randomSong = () => {
+  const randomSong = () => {
     let nextIndex;
     while (true) {
-      nextIndex = generateRandom(this.state.songQueue.length - 1);
-      if (nextIndex !== this.state.currentIndex) break;
+      nextIndex = generateRandom(songQueue.length - 1);
+      if (nextIndex !== currentIndex) break;
     }
-    this.setState({
-      currentIndex: nextIndex
-    });
+    setCurrentIndex(nextIndex);
   };
 
-  //TODO fix
-  changeRepeatStatus = () => {
-    this.setState({
-      repeatOne: !this.state.repeatOne
+  const changeRepeatStatus = () =>
+    setRepeatOne(repeatOne => {
+      repeat = !repeatOne;
+      return !repeatOne;
     });
-  };
 
-  nextQueueSong = () => {
-    if (this.state.repeatOne) {
-      return this.changeSong(0);
+  const nextQueueSong = () => {
+    if (repeat) {
+      setSongQueue(queue =>
+        queue.map((song, i) => {
+          if (i === currentIndex) {
+            return { ...song, flag: new Date().getTime() };
+          }
+          return song;
+        })
+      );
+      return changeSong(0);
     }
-    this.nextSong();
+    nextSong();
   };
 
-  changeSong(diff) {
-    let nextIndex = this.state.currentIndex + diff;
+  const changeSong = diff => {
+    let nextIndex = currentIndex + diff;
     if (nextIndex < 0) {
-      nextIndex = this.state.songQueue.length - 1;
+      nextIndex = songQueue.length - 1;
     }
-    if (nextIndex === this.state.songQueue.length) {
+    if (nextIndex === songQueue.length) {
       nextIndex = 0;
     }
-    this.setState({
-      currentIndex: nextIndex
-    });
-  }
-
-  nextSong = () => {
-    this.changeSong(1);
+    setCurrentIndex(nextIndex);
   };
 
-  previousSong = () => {
-    this.changeSong(-1);
-  };
-}
+  const nextSong = () => changeSong(1);
 
-export default Player;
+  const previousSong = () => this.changeSong(-1);
+
+  return {
+    state: {
+      currentIndex,
+      repeatOne,
+      repeatAll,
+      songQueue
+    },
+    initialize,
+    previousSong,
+    nextSong,
+    nextQueueSong,
+    randomSong,
+    changeRepeatStatus
+  };
+};
+
+export default createContainer(usePlaylist);
