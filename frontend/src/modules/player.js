@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createContainer } from "unstated-next";
 
 const generateRandom = max => Math.round(Math.random() * max);
 
-let repeat = false;
-
 const usePlaylist = () => {
-  const [repeatOne, setRepeatOne] = useState(repeat);
+  const [repeatOne, setRepeatOne] = useState(false);
+  const refValue = useRef(repeatOne);
   const [repeatAll, setRepeatAll] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [songQueue, setSongQueue] = useState([]);
+
+  useEffect(() => {
+    refValue.current = repeatOne;
+  });
 
   const initialize = ({ songQueue, currentIndex }) => {
     setSongQueue(songQueue);
@@ -26,14 +29,10 @@ const usePlaylist = () => {
     setCurrentIndex(nextIndex);
   };
 
-  const changeRepeatStatus = () =>
-    setRepeatOne(repeatOne => {
-      repeat = !repeatOne;
-      return !repeatOne;
-    });
+  const changeRepeatStatus = () => setRepeatOne(repeatOne => !repeatOne);
 
   const nextQueueSong = () => {
-    if (repeat) {
+    if (refValue.current) {
       setSongQueue(queue =>
         queue.map((song, i) => {
           if (i === currentIndex) {

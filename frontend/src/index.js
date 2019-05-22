@@ -3,20 +3,20 @@ import ReactDOM from "react-dom";
 import { ApolloProvider } from "react-apollo";
 import { Router } from "react-router-dom";
 
-import Player from "./pages/Player/container";
+import Providers from "./Providers";
 import * as serviceWorker from "./serviceWorker";
 import history from "./helpers/history";
 import client from "./apolloClient";
 import Routes from "./routes";
 
 ReactDOM.render(
-  <Player.Provider>
+  <Providers>
     <ApolloProvider client={client}>
       <Router history={history}>
         <Routes />
       </Router>
     </ApolloProvider>
-  </Player.Provider>,
+  </Providers>,
   document.getElementById("root")
 );
 

@@ -2,7 +2,7 @@ import React from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 
-import Player from "../container";
+import Player from "../../../modules/player";
 import Folder from "./Folder";
 import Song from "./Song";
 

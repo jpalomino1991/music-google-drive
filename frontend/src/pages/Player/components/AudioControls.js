@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Flex } from "rebass";
 
-import Player from "../container";
+import Player from "../../../modules/player";
 import { IconButton } from "../../../components";
 
 const getUrl = (id, token) => `${id}&access_token=${token}`;
