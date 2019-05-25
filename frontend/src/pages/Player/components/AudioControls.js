@@ -1,73 +1,66 @@
-import React, { useEffect, useState } from "react";
-import { Flex } from "rebass";
+import React from "react";
+import { Flex, Box } from "rebass";
 
-import Player from "../../../modules/player";
+import useMusicPlayer from "../../../hooks/useMusicPlayer";
 import { IconButton } from "../../../components";
 
-const getUrl = (id, token) => `${id}&access_token=${token}`;
-
-let audio = new Audio();
-
 const AudioControls = () => {
+  const [track, audio, controls] = useMusicPlayer();
+  /*
   const player = Player.useContainer();
-  const [playing, togglePlaying] = useState(false);
-  const [duration, updateDuration] = useState(undefined);
-
   const song = player.state.songQueue[player.state.currentIndex];
-
-  useEffect(() => {
-    if (!song) return;
-    const loadSong = async () => {
-      audio.pause();
-      const res = await fetch(process.env.REACT_APP_BACKEND_URL + "/tokens", {
-        credentials: "include"
-      });
-      const { access_token } = await res.json();
-      audio.src = getUrl(song.link, access_token);
-      audio.onloadedmetadata = _ => updateDuration(audio.duration);
-      audio.onended = _ => player.nextQueueSong();
-      audio.play().then(() => togglePlaying(true));
-    };
-    loadSong();
-  }, [song]);
-
-  const pause = () => {
-    if (playing) {
-      audio.pause();
-      togglePlaying(false);
-    }
-  };
-  const play = () => {
-    if (!playing) {
-      audio.play();
-      togglePlaying(true);
-    }
+  const song2 = {
+    id: "1kYYS9FZ9Vxif5WJM9ZQcY4SR35NMgoIE",
+    link:
+      "https://doc-0o-28-docs.googleusercontent.com/docs/securesc/bgp95l3eabkkpccn0qi0qopvc4e7d4mq/v77a0tq39cgvqtvt8v68lgf9rkeroare/1558497600000/01732506421897009934/01732506421897009934/1kYYS9FZ9Vxif5WJM9ZQcY4SR35NMgoIE?h=14771753379018855219&e=download&gd=true",
+    parentId: "1hGQ0slskFhbourYzt1q052vVuH5wKvpR",
+    providerId: "01732506421897009934",
+    title: "Kanaku y el Tigre - Lucía  El Chico del Pórtico2",
+    type: "songs",
+    __typename: "Item"
   };
 
-  if (!song) return null;
+  const [url, error] = useAudioURL(song && song.link);
+
+  const [audio, controls] = useAudio(url);
+	*/
+
+  const percentagePlayed = Math.round(
+    (audio.currentTime * 100) / audio.duration
+  );
+
+  if (!track) return null;
 
   return (
     <Flex flexDirection="column" pt={4}>
       <div>
-        {song.title} {duration}
+        {track.title}- {audio.currentTime} - {audio.duration}
       </div>
+
+      <Box width="100px" style={{ height: "5px" }} bg="gray">
+        <Box
+          bg="magenta"
+          width={`${percentagePlayed}%`}
+          style={{ height: "100%" }}
+        />
+      </Box>
       <Flex justifyContent="center" alignItems="center" pt={3}>
-        <IconButton name="random" mx={3} onClick={player.randomSong} />
-        <IconButton name="backward" mx={3} onClick={player.previousSong} />
+        <IconButton name="random" mx={3} />
+        <IconButton name="backward" mx={3} onClick={controls.previousSong} />
         <IconButton
-          name={playing ? "pause" : "play"}
+          name={audio.isPlaying ? "pause" : "play"}
           mx={3}
           fontSize={5}
-          onClick={playing ? pause : play}
+          onClick={audio.isPlaying ? controls.pause : controls.play}
         />
-        <IconButton name="forward" mx={3} onClick={player.nextSong} />
+        <IconButton name="forward" mx={3} onClick={() => controls.nextSong()} />
         <IconButton
           style={{ position: "relative" }}
           name="redo"
           mx={3}
-          onClick={player.changeRepeatStatus}
+          onClick={controls.changeRepeatStatus}
         >
-          {player.state.repeatOne && (
+          {audio.repeatOne && (
             <div
               style={{
                 position: "absolute",

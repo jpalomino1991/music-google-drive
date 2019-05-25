@@ -2,7 +2,7 @@ import React from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 
-import Player from "../../../modules/player";
+import { useMusicQueue } from "../../../hooks/musicQueueContext";
 import Folder from "./Folder";
 import Song from "./Song";
 
@@ -22,7 +22,7 @@ const FETCH_ITEMS = gql`
 const byTitle = (a, b) => (a.title > b.title ? 1 : -1);
 
 const Items = ({ id }) => {
-  const player = Player.useContainer();
+  const { setSongQueue } = useMusicQueue();
 
   return (
     <Query query={FETCH_ITEMS} variables={{ id }}>
@@ -37,12 +37,9 @@ const Items = ({ id }) => {
                 ) : (
                   <Song
                     onClick={() =>
-                      player.initialize({
-                        songQueue: data.items.filter(
-                          item => item.type !== "folders"
-                        ),
-                        currentIndex: i
-                      })
+                      setSongQueue(
+                        data.items.filter(item => item.type !== "folders")
+                      )
                     }
                     {...item}
                   />
