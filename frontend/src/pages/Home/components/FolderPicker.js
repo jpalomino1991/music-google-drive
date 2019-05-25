@@ -1,7 +1,8 @@
 import React from "react";
 import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
-import GooglePicker from "react-google-picker";
+//import GooglePicker from "react-google-picker";
+import GooglePicker from "./GooglePicker";
 
 var scope = "https://www.googleapis.com/auth/drive.readonly";
 
@@ -15,6 +16,19 @@ const CREATE_FOLDER = gql`
 `;
 
 class FolderPicker extends React.Component {
+  state = { loaded: false, accessToken: null };
+
+  async componentDidMount() {
+    const res = await fetch(process.env.REACT_APP_BACKEND_URL + "/tokens", {
+      credentials: "include"
+    }).catch(e => console.log(e));
+    const { access_token: accessToken } = await res.json();
+    this.setState({
+      loaded: true,
+      accessToken
+    });
+  }
+
   onCallback = createFolder => data => {
     if (
       data[window.google.picker.Response.ACTION] ==
@@ -33,6 +47,8 @@ class FolderPicker extends React.Component {
     }
   };
   render() {
+    const { accessToken } = this.state;
+
     return (
       <Mutation mutation={CREATE_FOLDER}>
         {(createFolder, { data, loading, error }) => {
@@ -49,6 +65,7 @@ class FolderPicker extends React.Component {
           return (
             <div>
               <GooglePicker
+                accessToken={accessToken}
                 clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
                 scope={[scope]}
                 onAuthenticate={token => console.log("oauth token:", token)}
