@@ -23,7 +23,6 @@ const Home = props => {
   return (
     <Query query={FETCH_FOLDERS}>
       {({ loading, data }) => {
-        return <FolderPicker />;
         if (loading) return <div>loading</div>;
         if (!data.folders.length) return <FolderPicker />;
         const folder = data.folders[0];
