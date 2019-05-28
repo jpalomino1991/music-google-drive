@@ -1,16 +1,7 @@
-const AWS = require('aws-sdk');
 const R = require('ramda');
 
 const options = {
   host: process.env.ELASTIC_URL,
-  connectionClass: require('http-aws-es'),
-  awsConfig: new AWS.Config({
-    credentials: new AWS.Credentials(
-      process.env.ELASTIC_ACCESS_KEY_ID,
-      process.env.ELASTIC_ACCESS_KEY_SECRET
-    ),
-    region: process.env.ELASTIC_REGION
-  })
 };
 
 const client = require('elasticsearch').Client(options);
@@ -18,8 +9,8 @@ const client = require('elasticsearch').Client(options);
 const songHeader = {
   index: {
     _index: 'songs',
-    _type: '_doc'
-  }
+    _type: '_doc',
+  },
 };
 
 const removeFileExtension = fileName => fileName.replace(/\.[^\.]+$/, '');
@@ -27,8 +18,8 @@ const removeFileExtension = fileName => fileName.replace(/\.[^\.]+$/, '');
 const folderHeader = {
   index: {
     _index: 'folders',
-    _type: '_doc'
-  }
+    _type: '_doc',
+  },
 };
 
 module.exports.bulkUploadFolders = (folders, providerId) =>
@@ -41,10 +32,10 @@ module.exports.bulkUploadFolders = (folders, providerId) =>
           driveId: id,
           providerId,
           title,
-          parentId: parents[0].id
-        }
+          parentId: parents[0].id,
+        },
       ])
-    )(folders)
+    )(folders),
   });
 
 module.exports.bulkUploadSongs = (songs, providerId) =>
@@ -64,19 +55,19 @@ module.exports.bulkUploadSongs = (songs, providerId) =>
           year: tags.year,
           genre: tags.genre,
           link: downloadUrl,
-          image: ''
-        }
+          image: '',
+        },
       ])
-    )(songs)
+    )(songs),
   });
 
 const createIndexIfNotExists = async index => {
   const exists = await client.indices.exists({
-    index
+    index,
   });
   if (!exists) {
     return await client.indices.create({
-      index
+      index,
     });
   }
 };
@@ -84,7 +75,7 @@ const createIndexIfNotExists = async index => {
 const parseItem = ({ _index: type, _id: id, _source }) => ({
   type,
   id: _source.driveId,
-  ..._source
+  ..._source,
 });
 
 module.exports.getItem = async (id, providerId) => {
@@ -97,18 +88,18 @@ module.exports.getItem = async (id, providerId) => {
             must: [
               {
                 match: {
-                  driveId: id
-                }
+                  driveId: id,
+                },
               },
               {
                 match: {
-                  providerId
-                }
-              }
-            ]
-          }
-        }
-      }
+                  providerId,
+                },
+              },
+            ],
+          },
+        },
+      },
     });
     return parseItem(response.hits.hits[0]);
   } catch (e) {
@@ -127,18 +118,18 @@ module.exports.getChildren = async (parentId, providerId) => {
           must: [
             {
               match: {
-                parentId
-              }
+                parentId,
+              },
             },
             {
               match: {
-                providerId
-              }
-            }
-          ]
-        }
-      }
-    }
+                providerId,
+              },
+            },
+          ],
+        },
+      },
+    },
   });
 
   return R.map(parseItem)(response.hits.hits);
