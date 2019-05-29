@@ -1,5 +1,3 @@
-const { google } = require('googleapis');
-
 const db = require('../db');
 const drive = require('./drive');
 const fetchFiles = require('./fetchFiles');
@@ -10,25 +8,25 @@ module.exports = async ({
   providerId,
   folderDriveId,
   folderId,
-  refreshToken
+  refreshToken,
 }) => {
   try {
     console.time('fetch drive');
     const counts = await fetchFiles({
       driveClient: await drive.createClient(refreshToken),
       folderId,
-      folderDriveId
+      folderDriveId,
     });
     console.timeEnd('fetch drive');
 
     await db.mutation.updateMusicFolder({
       data: {
         totalFiles: counts.files,
-        totalFolders: counts.folders
+        totalFolders: counts.folders,
       },
       where: {
-        id: folderId
-      }
+        id: folderId,
+      },
     });
 
     console.time('upload elastic');
@@ -36,7 +34,7 @@ module.exports = async ({
       providerId,
       folderId,
       folderDriveId,
-      counts
+      counts,
     });
     console.timeEnd('upload elastic');
     /*

@@ -6,7 +6,7 @@ const Mutation = {
     args,
     {
       db,
-      request: { userId }
+      request: { userId },
     },
     info
   ) {
@@ -14,9 +14,9 @@ const Mutation = {
 
     const folderExists = await db.exists.MusicFolder({
       user: {
-        id: userId
+        id: userId,
       },
-      folderId: args.folderId
+      folderId: args.folderId,
     });
     if (folderExists) throw new Error('Folder already linked');
 
@@ -26,33 +26,33 @@ const Mutation = {
           states: {
             create: [
               {
-                status: 'STARTING'
-              }
-            ]
+                status: 'STARTING',
+              },
+            ],
           },
           user: {
             connect: {
-              id: userId
-            }
+              id: userId,
+            },
           },
-          ...args
-        }
+          ...args,
+        },
       },
       info
     );
     const user = await db.query.user({
       where: {
-        id: userId
-      }
+        id: userId,
+      },
     });
     tasks({
       folderDriveId: args.folderId,
       folderId: newFolder.id,
       refreshToken: user.refreshToken,
-      providerId: user.providerId
+      providerId: user.providerId,
     });
     return newFolder;
-  }
+  },
 };
 
 module.exports = Mutation;

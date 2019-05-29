@@ -21,7 +21,7 @@ module.exports.createClient = async refreshToken => {
   oauth2Client.setCredentials(tokens);
   const drive = google.drive({
     version: 'v2',
-    auth: oauth2Client
+    auth: oauth2Client,
   });
   return drive;
 };
@@ -33,7 +33,7 @@ module.exports.createPartialFile = async ({ driveClient, fileId, path }) => {
       {
         headers: { Range: 'bytes=0-8192' },
         fileId,
-        alt: 'media'
+        alt: 'media',
       },
       { responseType: 'stream' },
 
@@ -66,7 +66,7 @@ module.exports.isFolder = ({ mimeType }) => isType('folder')(mimeType);
 module.exports.fetchFolderContent = async ({
   driveClient,
   parentId,
-  pageToken
+  pageToken,
 }) =>
   (await driveClient.files.list({
     q: `'${parentId}' in parents and (fileExtension = 'mp3' or fileExtension = 'flac' or mimeType = 'application/vnd.google-apps.folder')`,
@@ -74,5 +74,5 @@ module.exports.fetchFolderContent = async ({
     supportsTeamDrives: true,
     spaces: 'drive',
     pageToken,
-    pageSize: PAGE_SIZE
+    pageSize: PAGE_SIZE,
   })).data;

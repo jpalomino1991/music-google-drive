@@ -11,21 +11,21 @@ const oauth2Client = new google.auth.OAuth2(
 
 const scopes = [
   'https://www.googleapis.com/auth/drive',
-  'https://www.googleapis.com/auth/drive.readonly'
+  'https://www.googleapis.com/auth/drive.readonly',
 ];
 
 const findUserByProviderId = providerId =>
   db.query.user({
     where: {
-      providerId
-    }
+      providerId,
+    },
   });
 
 module.exports = server => {
   server.express.get('/google/login', (req, res) => {
     const url = oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: scopes
+      scope: scopes,
     });
     res.redirect(301, url);
   });
@@ -39,7 +39,7 @@ module.exports = server => {
       const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
       const {
-        data: { user: driveUser }
+        data: { user: driveUser },
       } = await drive.about.get({ fields: 'user' });
 
       let userId;
@@ -55,8 +55,8 @@ module.exports = server => {
             displayName: driveUser.displayName,
             picture: driveUser.photoLink || 'image not found',
             refreshToken: tokens.refresh_token,
-            email: driveUser.emailAddress
-          }
+            email: driveUser.emailAddress,
+          },
         });
         userId = user.id;
         providerId = user.providerId;
@@ -64,13 +64,13 @@ module.exports = server => {
       const token = jwt.sign(
         {
           userId,
-          providerId
+          providerId,
         },
         process.env.JWT_SECRET
       );
       res.cookie('token', token, {
         //httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 * 365 //1 year
+        maxAge: 1000 * 60 * 60 * 24 * 365, //1 year
       });
       res.redirect(301, process.env.FRONTEND_URL);
     } catch (e) {
