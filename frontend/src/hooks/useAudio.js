@@ -98,7 +98,13 @@ const useAudio = (src, opts) => {
   const seek = time => {
     audio.currentTime = time;
   };
-  const mute = () => {};
+  const mute = () => {
+    setState(state => ({
+      ...state,
+      volume: 0
+    }));
+    audio.volume = 0;
+  };
   const unmute = () => {};
 
   const controls = { play, pause, seek, setVolume, mute, unmute };
