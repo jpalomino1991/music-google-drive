@@ -1,8 +1,20 @@
+const AWS = require('aws-sdk');
 const R = require('ramda');
 
 const options = {
   host: process.env.ELASTIC_URL,
 };
+
+if (process.env.NODE_ENV === 'production') {
+  options.connectionClass = require('http-aws-es');
+  options.awsConfig = new AWS.Config({
+    credentials: new AWS.Credentials(
+      process.env.ELASTIC_ACCESS_KEY_ID,
+      process.env.ELASTIC_ACCESS_KEY_SECRET
+    ),
+    region: process.env.ELASTIC_REGION,
+  });
+}
 
 const client = require('elasticsearch').Client(options);
 
