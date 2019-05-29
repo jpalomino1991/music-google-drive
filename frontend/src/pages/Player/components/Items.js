@@ -36,11 +36,15 @@ const Items = ({ id }) => {
                   <Folder {...item} />
                 ) : (
                   <Song
-                    onClick={() =>
-                      setSongQueue(
-                        data.items.filter(item => item.type !== "folders")
-                      )
-                    }
+                    onClick={() => {
+                      const songs = data.items.filter(
+                        item => item.type !== "folders"
+                      );
+                      const songsOrdered = songs
+                        .slice(i)
+                        .concat(songs.slice(0, i));
+                      setSongQueue(songsOrdered);
+                    }}
                     {...item}
                   />
                 )}

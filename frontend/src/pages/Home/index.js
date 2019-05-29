@@ -5,7 +5,6 @@ import { Redirect } from "react-router-dom";
 
 import FolderPicker from "./components/FolderPicker";
 
-//TODO: add query get only one folder: 'query folder'
 const FETCH_FOLDERS = gql`
   query {
     folders {
@@ -26,8 +25,9 @@ const Home = props => {
         if (loading) return <div>loading</div>;
         if (!data.folders.length) return <FolderPicker />;
         const folder = data.folders[0];
-        const currentStatus = folder.states[0].status;
-        if (currentStatus === "SONGS_UPLOADED") {
+        const hasFolderBeingUploaded =
+          folder.states[0].status === "SONGS_UPLOADED";
+        if (hasFolderBeingUploaded) {
           return <Redirect to={`/player/${folder.folderId}`} />;
         }
         return <div>wait {folder.name} is loading</div>;

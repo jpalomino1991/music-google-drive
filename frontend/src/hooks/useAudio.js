@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 const audio = new Audio();
 
-const useAudio = src => {
+const useAudio = (src, opts) => {
   const [state, setState] = useState({
     isPlaying: false,
     currentTime: 0,
@@ -12,18 +12,23 @@ const useAudio = src => {
   });
 
   useEffect(() => {
-    if (!src || state.currentTime !== 0) return;
+    if (!src) return;
+    pause();
     setState(state => ({ ...state, loaded: false }));
     audio.autoplay = true;
     audio.src = src;
     audio.ontimeupdate = onTimeUpdate;
     audio.onloadedmetadata = onLoadedMetadata;
-  }, [src, state.currentTime]);
+    if (opts.onEnded) {
+      audio.onended = opts.onEnded;
+    }
+  }, [src]);
 
   const onLoadedMetadata = () => {
     setState(state => ({
       ...state,
       loaded: true,
+      isPlaying: true,
       duration: audio.duration
     }));
   };
@@ -41,8 +46,6 @@ const useAudio = src => {
         if (promise !== undefined) {
           promise
             .then(_ => {
-              console.log("ok");
-
               setState(state => ({
                 ...state,
                 isPlaying: true
@@ -50,9 +53,12 @@ const useAudio = src => {
             })
             .catch(error => {
               console.log(error);
-              // Autoplay was prevented.
-              // Show a "Play" button so that user can start playback.
             });
+        } else {
+          setState(state => ({
+            ...state,
+            isPlaying: true
+          }));
         }
       }
     } catch (e) {
@@ -74,6 +80,11 @@ const useAudio = src => {
           .catch(error => {
             console.log(error);
           });
+      } else {
+        setState(state => ({
+          ...state,
+          isPlaying: false
+        }));
       }
     }
   };
@@ -84,7 +95,9 @@ const useAudio = src => {
       volume: newVolume
     }));
   };
-  const seek = () => {};
+  const seek = time => {
+    audio.currentTime = time;
+  };
   const mute = () => {};
   const unmute = () => {};
 

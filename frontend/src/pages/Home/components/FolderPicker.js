@@ -1,10 +1,9 @@
 import React from "react";
 import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
-//import GooglePicker from "react-google-picker";
 import GooglePicker from "./GooglePicker";
 
-var scope = "https://www.googleapis.com/auth/drive.readonly";
+const scope = "https://www.googleapis.com/auth/drive.readonly";
 
 const CREATE_FOLDER = gql`
   mutation createFolder($folderId: String!, $name: String!, $iconUrl: String) {
@@ -31,7 +30,7 @@ class FolderPicker extends React.Component {
 
   onCallback = createFolder => data => {
     if (
-      data[window.google.picker.Response.ACTION] ==
+      data[window.google.picker.Response.ACTION] ===
       window.google.picker.Action.PICKED
     ) {
       const { id, name, iconUrl } = data[
