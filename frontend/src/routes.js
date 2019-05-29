@@ -1,10 +1,17 @@
 import React, { Component } from "react";
 import { Switch, Route } from "react-router-dom";
-import { PrivateRoute } from "./components";
+import Loadable from "react-loadable";
 
+import { PrivateRoute } from "./components";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import Player from "./pages/Player";
+
+const Loading = () => <div> Loading ...</div>;
+
+const Player = Loadable({
+  loader: () => import("./pages/Player"),
+  loading: Loading
+});
 
 class App extends Component {
   render() {
