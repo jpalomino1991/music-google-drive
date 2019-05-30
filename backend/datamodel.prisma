@@ -9,31 +9,15 @@ enum Status {
   READY
 }
 
-type GoogleInfo {
-	id: ID! @id
-  user: User @relation(link: INLINE)
-  etag: String
-  familyName: String
-  givenName: String
-  kind: String
-  objectType: String
-  url: String
-  language: String
-  isPlusUser: Boolean
-  verified: Boolean
-	updatedAt: DateTime! @updatedAt
-	createdAt: DateTime! @createdAt
-}
-
 type User {
   id: ID! @unique @id
   providerId: String! @unique
   displayName: String!
   picture: String!
   refreshToken: String!
-  email: String !
-	updatedAt: DateTime! @updatedAt
-	createdAt: DateTime! @createdAt
+  email: String!
+  updatedAt: DateTime! @updatedAt
+  createdAt: DateTime! @createdAt
 }
 
 type MusicFolder {
@@ -43,18 +27,19 @@ type MusicFolder {
   totalFolders: Int
   name: String!
   iconUrl: String
-	updatedAt: DateTime! @updatedAt
-	createdAt: DateTime! @createdAt
-  states: [State!]! 
-  user: User! 
+  updatedAt: DateTime! @updatedAt
+  createdAt: DateTime! @createdAt
+  states: [State!]! @relation(name: "StateByMusicFolder", onDelete: CASCADE)
+  user: User!
 }
 
 type State {
   id: ID! @unique @id
-  folder: MusicFolder! @relation(link: INLINE onDelete: CASCADE)
+  folder: MusicFolder!
+    @relation(link: INLINE, onDelete: CASCADE, name: "StateByMusicFolder")
   status: Status!
   extraData: Json
   errorMessage: String
-	updatedAt: DateTime! @updatedAt
-	createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  createdAt: DateTime! @createdAt
 }
