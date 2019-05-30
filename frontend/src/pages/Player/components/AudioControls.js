@@ -34,7 +34,15 @@ const AudioControls = () => {
         bg="#56517e"
         mr={3}
       />
-      <Text fontWeight="bold" width="200px">
+      <Text
+        fontWeight="bold"
+        width="200px"
+        css={`
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        `}
+      >
         {track.title}
       </Text>
 
