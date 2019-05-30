@@ -33,7 +33,7 @@ const Items = ({ id }) => {
           <Box
             py={3}
             css={`
-              max-height: 80vh;
+              max-height: 79vh;
               overflow: auto;
             `}
           >
