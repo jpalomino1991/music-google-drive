@@ -9,7 +9,6 @@ import Home from './pages/Home';
 
 const Container = styled.div`
   height: 100vh;
-  background: ${props => props.theme.colors.background};
 `;
 
 const GlobalStyle = createGlobalStyle`
@@ -17,6 +16,7 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     font-family: 'Muli', sans-serif;
+    background: ${props => props.theme.colors.background};
   }
   * {
     box-sizing: border-box;
