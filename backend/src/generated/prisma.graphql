@@ -1,5 +1,5 @@
-# source: https://prod-drive-music-27ae0599f5.herokuapp.com/prod-drive-music/prod
-# timestamp: Mon Apr 15 2019 18:18:46 GMT-0500 (Peru Standard Time)
+# source: https://us1.prisma.sh/music-drive/music-drive/dev
+# timestamp: Sat May 25 2019 12:24:24 GMT-0500 (Peru Standard Time)
 
 type AggregateGoogleInfo {
   count: Int!
@@ -24,7 +24,8 @@ type BatchPayload {
 
 scalar DateTime
 
-type GoogleInfo {
+type GoogleInfo implements Node {
+  id: ID!
   user: User
   etag: String
   familyName: String
@@ -35,6 +36,8 @@ type GoogleInfo {
   language: String
   isPlusUser: Boolean
   verified: Boolean
+  updatedAt: DateTime!
+  createdAt: DateTime!
 }
 
 """A connection to a list of items."""
@@ -48,6 +51,7 @@ type GoogleInfoConnection {
 }
 
 input GoogleInfoCreateInput {
+  id: ID
   etag: String
   familyName: String
   givenName: String
@@ -70,6 +74,8 @@ type GoogleInfoEdge {
 }
 
 enum GoogleInfoOrderByInput {
+  id_ASC
+  id_DESC
   etag_ASC
   etag_DESC
   familyName_ASC
@@ -88,8 +94,6 @@ enum GoogleInfoOrderByInput {
   isPlusUser_DESC
   verified_ASC
   verified_DESC
-  id_ASC
-  id_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -97,6 +101,7 @@ enum GoogleInfoOrderByInput {
 }
 
 type GoogleInfoPreviousValues {
+  id: ID!
   etag: String
   familyName: String
   givenName: String
@@ -106,6 +111,8 @@ type GoogleInfoPreviousValues {
   language: String
   isPlusUser: Boolean
   verified: Boolean
+  updatedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type GoogleInfoSubscriptionPayload {
@@ -147,6 +154,19 @@ input GoogleInfoSubscriptionWhereInput {
   node: GoogleInfoWhereInput
 }
 
+input GoogleInfoUpdateInput {
+  etag: String
+  familyName: String
+  givenName: String
+  kind: String
+  objectType: String
+  url: String
+  language: String
+  isPlusUser: Boolean
+  verified: Boolean
+  user: UserUpdateOneInput
+}
+
 input GoogleInfoUpdateManyMutationInput {
   etag: String
   familyName: String
@@ -168,6 +188,46 @@ input GoogleInfoWhereInput {
 
   """Logical NOT on all given filters combined by AND."""
   NOT: [GoogleInfoWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
   etag: String
 
   """All values that are not equal to given value."""
@@ -456,7 +516,55 @@ input GoogleInfoWhereInput {
 
   """All values that are not equal to given value."""
   verified_not: Boolean
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
   user: UserWhereInput
+}
+
+input GoogleInfoWhereUniqueInput {
+  id: ID
 }
 
 """Raw JSON value"""
@@ -475,8 +583,8 @@ type MusicFolder implements Node {
   totalFolders: Int
   name: String!
   iconUrl: String
-  createdAt: DateTime!
   updatedAt: DateTime!
+  createdAt: DateTime!
   states(where: StateWhereInput, orderBy: StateOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [State!]
   user: User!
 }
@@ -492,6 +600,7 @@ type MusicFolderConnection {
 }
 
 input MusicFolderCreateInput {
+  id: ID
   folderId: String!
   totalFiles: Int
   totalFolders: Int
@@ -507,6 +616,7 @@ input MusicFolderCreateOneWithoutStatesInput {
 }
 
 input MusicFolderCreateWithoutStatesInput {
+  id: ID
   folderId: String!
   totalFiles: Int
   totalFolders: Int
@@ -537,10 +647,10 @@ enum MusicFolderOrderByInput {
   name_DESC
   iconUrl_ASC
   iconUrl_DESC
-  createdAt_ASC
-  createdAt_DESC
   updatedAt_ASC
   updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
 }
 
 type MusicFolderPreviousValues {
@@ -550,8 +660,8 @@ type MusicFolderPreviousValues {
   totalFolders: Int
   name: String!
   iconUrl: String
-  createdAt: DateTime!
   updatedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type MusicFolderSubscriptionPayload {
@@ -611,11 +721,9 @@ input MusicFolderUpdateManyMutationInput {
   iconUrl: String
 }
 
-input MusicFolderUpdateOneWithoutStatesInput {
+input MusicFolderUpdateOneRequiredWithoutStatesInput {
   create: MusicFolderCreateWithoutStatesInput
   connect: MusicFolderWhereUniqueInput
-  disconnect: Boolean
-  delete: Boolean
   update: MusicFolderUpdateWithoutStatesDataInput
   upsert: MusicFolderUpsertWithoutStatesInput
 }
@@ -847,28 +955,6 @@ input MusicFolderWhereInput {
 
   """All values not ending with the given string."""
   iconUrl_not_ends_with: String
-  createdAt: DateTime
-
-  """All values that are not equal to given value."""
-  createdAt_not: DateTime
-
-  """All values that are contained in given list."""
-  createdAt_in: [DateTime!]
-
-  """All values that are not contained in given list."""
-  createdAt_not_in: [DateTime!]
-
-  """All values less than the given value."""
-  createdAt_lt: DateTime
-
-  """All values less than or equal the given value."""
-  createdAt_lte: DateTime
-
-  """All values greater than the given value."""
-  createdAt_gt: DateTime
-
-  """All values greater than or equal the given value."""
-  createdAt_gte: DateTime
   updatedAt: DateTime
 
   """All values that are not equal to given value."""
@@ -891,6 +977,28 @@ input MusicFolderWhereInput {
 
   """All values greater than or equal the given value."""
   updatedAt_gte: DateTime
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
   states_every: StateWhereInput
   states_some: StateWhereInput
   states_none: StateWhereInput
@@ -906,12 +1014,15 @@ type Mutation {
   createMusicFolder(data: MusicFolderCreateInput!): MusicFolder!
   createState(data: StateCreateInput!): State!
   createUser(data: UserCreateInput!): User!
+  updateGoogleInfo(data: GoogleInfoUpdateInput!, where: GoogleInfoWhereUniqueInput!): GoogleInfo
   updateMusicFolder(data: MusicFolderUpdateInput!, where: MusicFolderWhereUniqueInput!): MusicFolder
   updateState(data: StateUpdateInput!, where: StateWhereUniqueInput!): State
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  deleteGoogleInfo(where: GoogleInfoWhereUniqueInput!): GoogleInfo
   deleteMusicFolder(where: MusicFolderWhereUniqueInput!): MusicFolder
   deleteState(where: StateWhereUniqueInput!): State
   deleteUser(where: UserWhereUniqueInput!): User
+  upsertGoogleInfo(where: GoogleInfoWhereUniqueInput!, create: GoogleInfoCreateInput!, update: GoogleInfoUpdateInput!): GoogleInfo!
   upsertMusicFolder(where: MusicFolderWhereUniqueInput!, create: MusicFolderCreateInput!, update: MusicFolderUpdateInput!): MusicFolder!
   upsertState(where: StateWhereUniqueInput!, create: StateCreateInput!, update: StateUpdateInput!): State!
   upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
@@ -957,6 +1068,7 @@ type Query {
   musicFolders(where: MusicFolderWhereInput, orderBy: MusicFolderOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [MusicFolder]!
   states(where: StateWhereInput, orderBy: StateOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [State]!
   users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
+  googleInfo(where: GoogleInfoWhereUniqueInput!): GoogleInfo
   musicFolder(where: MusicFolderWhereUniqueInput!): MusicFolder
   state(where: StateWhereUniqueInput!): State
   user(where: UserWhereUniqueInput!): User
@@ -974,12 +1086,12 @@ type Query {
 
 type State implements Node {
   id: ID!
-  folder: MusicFolder
+  folder: MusicFolder!
   status: Status!
-  createdAt: DateTime!
-  updatedAt: DateTime!
   extraData: Json
   errorMessage: String
+  updatedAt: DateTime!
+  createdAt: DateTime!
 }
 
 """A connection to a list of items."""
@@ -993,10 +1105,11 @@ type StateConnection {
 }
 
 input StateCreateInput {
+  id: ID
   status: Status!
   extraData: Json
   errorMessage: String
-  folder: MusicFolderCreateOneWithoutStatesInput
+  folder: MusicFolderCreateOneWithoutStatesInput!
 }
 
 input StateCreateManyWithoutFolderInput {
@@ -1005,6 +1118,7 @@ input StateCreateManyWithoutFolderInput {
 }
 
 input StateCreateWithoutFolderInput {
+  id: ID
   status: Status!
   extraData: Json
   errorMessage: String
@@ -1024,23 +1138,23 @@ enum StateOrderByInput {
   id_DESC
   status_ASC
   status_DESC
-  createdAt_ASC
-  createdAt_DESC
-  updatedAt_ASC
-  updatedAt_DESC
   extraData_ASC
   extraData_DESC
   errorMessage_ASC
   errorMessage_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
 }
 
 type StatePreviousValues {
   id: ID!
   status: Status!
-  createdAt: DateTime!
-  updatedAt: DateTime!
   extraData: Json
   errorMessage: String
+  updatedAt: DateTime!
+  createdAt: DateTime!
 }
 
 input StateScalarWhereInput {
@@ -1102,50 +1216,6 @@ input StateScalarWhereInput {
 
   """All values that are not contained in given list."""
   status_not_in: [Status!]
-  createdAt: DateTime
-
-  """All values that are not equal to given value."""
-  createdAt_not: DateTime
-
-  """All values that are contained in given list."""
-  createdAt_in: [DateTime!]
-
-  """All values that are not contained in given list."""
-  createdAt_not_in: [DateTime!]
-
-  """All values less than the given value."""
-  createdAt_lt: DateTime
-
-  """All values less than or equal the given value."""
-  createdAt_lte: DateTime
-
-  """All values greater than the given value."""
-  createdAt_gt: DateTime
-
-  """All values greater than or equal the given value."""
-  createdAt_gte: DateTime
-  updatedAt: DateTime
-
-  """All values that are not equal to given value."""
-  updatedAt_not: DateTime
-
-  """All values that are contained in given list."""
-  updatedAt_in: [DateTime!]
-
-  """All values that are not contained in given list."""
-  updatedAt_not_in: [DateTime!]
-
-  """All values less than the given value."""
-  updatedAt_lt: DateTime
-
-  """All values less than or equal the given value."""
-  updatedAt_lte: DateTime
-
-  """All values greater than the given value."""
-  updatedAt_gt: DateTime
-
-  """All values greater than or equal the given value."""
-  updatedAt_gte: DateTime
   errorMessage: String
 
   """All values that are not equal to given value."""
@@ -1186,6 +1256,50 @@ input StateScalarWhereInput {
 
   """All values not ending with the given string."""
   errorMessage_not_ends_with: String
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
 }
 
 type StateSubscriptionPayload {
@@ -1231,7 +1345,7 @@ input StateUpdateInput {
   status: Status
   extraData: Json
   errorMessage: String
-  folder: MusicFolderUpdateOneWithoutStatesInput
+  folder: MusicFolderUpdateOneRequiredWithoutStatesInput
 }
 
 input StateUpdateManyDataInput {
@@ -1249,6 +1363,7 @@ input StateUpdateManyMutationInput {
 input StateUpdateManyWithoutFolderInput {
   create: [StateCreateWithoutFolderInput!]
   connect: [StateWhereUniqueInput!]
+  set: [StateWhereUniqueInput!]
   disconnect: [StateWhereUniqueInput!]
   delete: [StateWhereUniqueInput!]
   update: [StateUpdateWithWhereUniqueWithoutFolderInput!]
@@ -1338,50 +1453,6 @@ input StateWhereInput {
 
   """All values that are not contained in given list."""
   status_not_in: [Status!]
-  createdAt: DateTime
-
-  """All values that are not equal to given value."""
-  createdAt_not: DateTime
-
-  """All values that are contained in given list."""
-  createdAt_in: [DateTime!]
-
-  """All values that are not contained in given list."""
-  createdAt_not_in: [DateTime!]
-
-  """All values less than the given value."""
-  createdAt_lt: DateTime
-
-  """All values less than or equal the given value."""
-  createdAt_lte: DateTime
-
-  """All values greater than the given value."""
-  createdAt_gt: DateTime
-
-  """All values greater than or equal the given value."""
-  createdAt_gte: DateTime
-  updatedAt: DateTime
-
-  """All values that are not equal to given value."""
-  updatedAt_not: DateTime
-
-  """All values that are contained in given list."""
-  updatedAt_in: [DateTime!]
-
-  """All values that are not contained in given list."""
-  updatedAt_not_in: [DateTime!]
-
-  """All values less than the given value."""
-  updatedAt_lt: DateTime
-
-  """All values less than or equal the given value."""
-  updatedAt_lte: DateTime
-
-  """All values greater than the given value."""
-  updatedAt_gt: DateTime
-
-  """All values greater than or equal the given value."""
-  updatedAt_gte: DateTime
   errorMessage: String
 
   """All values that are not equal to given value."""
@@ -1422,6 +1493,50 @@ input StateWhereInput {
 
   """All values not ending with the given string."""
   errorMessage_not_ends_with: String
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
   folder: MusicFolderWhereInput
 }
 
@@ -1454,8 +1569,8 @@ type User implements Node {
   picture: String!
   refreshToken: String!
   email: String!
-  createdAt: DateTime!
   updatedAt: DateTime!
+  createdAt: DateTime!
 }
 
 """A connection to a list of items."""
@@ -1469,6 +1584,7 @@ type UserConnection {
 }
 
 input UserCreateInput {
+  id: ID
   providerId: String!
   displayName: String!
   picture: String!
@@ -1503,10 +1619,10 @@ enum UserOrderByInput {
   refreshToken_DESC
   email_ASC
   email_DESC
-  createdAt_ASC
-  createdAt_DESC
   updatedAt_ASC
   updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
 }
 
 type UserPreviousValues {
@@ -1516,8 +1632,8 @@ type UserPreviousValues {
   picture: String!
   refreshToken: String!
   email: String!
-  createdAt: DateTime!
   updatedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type UserSubscriptionPayload {
@@ -1581,6 +1697,15 @@ input UserUpdateManyMutationInput {
   picture: String
   refreshToken: String
   email: String
+}
+
+input UserUpdateOneInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: UserUpdateDataInput
+  upsert: UserUpsertNestedInput
 }
 
 input UserUpdateOneRequiredInput {
@@ -1844,28 +1969,6 @@ input UserWhereInput {
 
   """All values not ending with the given string."""
   email_not_ends_with: String
-  createdAt: DateTime
-
-  """All values that are not equal to given value."""
-  createdAt_not: DateTime
-
-  """All values that are contained in given list."""
-  createdAt_in: [DateTime!]
-
-  """All values that are not contained in given list."""
-  createdAt_not_in: [DateTime!]
-
-  """All values less than the given value."""
-  createdAt_lt: DateTime
-
-  """All values less than or equal the given value."""
-  createdAt_lte: DateTime
-
-  """All values greater than the given value."""
-  createdAt_gt: DateTime
-
-  """All values greater than or equal the given value."""
-  createdAt_gte: DateTime
   updatedAt: DateTime
 
   """All values that are not equal to given value."""
@@ -1888,6 +1991,28 @@ input UserWhereInput {
 
   """All values greater than or equal the given value."""
   updatedAt_gte: DateTime
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
 }
 
 input UserWhereUniqueInput {

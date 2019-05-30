@@ -10,7 +10,8 @@ enum Status {
 }
 
 type GoogleInfo {
-  user: User @relation(name: "GoogleInfoByUser")
+	id: ID! @id
+  user: User @relation(link: INLINE)
   etag: String
   familyName: String
   givenName: String
@@ -20,38 +21,40 @@ type GoogleInfo {
   language: String
   isPlusUser: Boolean
   verified: Boolean
+	updatedAt: DateTime! @updatedAt
+	createdAt: DateTime! @createdAt
 }
 
 type User {
-  id: ID! @unique
+  id: ID! @unique @id
   providerId: String! @unique
   displayName: String!
   picture: String!
   refreshToken: String!
   email: String !
-  createdAt: DateTime!
-  updatedAt: DateTime!
+	updatedAt: DateTime! @updatedAt
+	createdAt: DateTime! @createdAt
 }
 
 type MusicFolder {
-  id: ID! @unique
+  id: ID! @unique @id
   folderId: String!
   totalFiles: Int
   totalFolders: Int
   name: String!
   iconUrl: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  states: [State!]! @relation(name: "StateByMusicFolder" onDelete: CASCADE)
-  user: User!
+	updatedAt: DateTime! @updatedAt
+	createdAt: DateTime! @createdAt
+  states: [State!]! 
+  user: User! 
 }
 
 type State {
-  id: ID! @unique
-  folder: MusicFolder @relation(name: "StateByMusicFolder")
+  id: ID! @unique @id
+  folder: MusicFolder! @relation(link: INLINE onDelete: CASCADE)
   status: Status!
-  createdAt: DateTime!
-  updatedAt: DateTime!
   extraData: Json
   errorMessage: String
+	updatedAt: DateTime! @updatedAt
+	createdAt: DateTime! @createdAt
 }
