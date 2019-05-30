@@ -1,10 +1,11 @@
-import React from "react";
-import { Query } from "react-apollo";
-import gql from "graphql-tag";
+import React from 'react';
+import { Query } from 'react-apollo';
+import gql from 'graphql-tag';
+import { Box } from 'rebass';
 
-import { useMusicQueue } from "../../../hooks/musicQueueContext";
-import Folder from "./Folder";
-import Song from "./Song";
+import { useMusicQueue } from '../../../hooks/musicQueueContext';
+import Folder from './Folder';
+import Song from './Song';
 
 const FETCH_ITEMS = gql`
   query FETCH_ITEMS($id: String) {
@@ -29,28 +30,33 @@ const Items = ({ id }) => {
       {({ loading, data }) => {
         if (loading) return <div>loading</div>;
         return (
-          <div>
-            {data.items.sort(byTitle).map((item, i) => (
-              <div key={item.id}>
-                {item.type === "folders" ? (
-                  <Folder {...item} />
-                ) : (
-                  <Song
-                    onClick={() => {
-                      const songs = data.items.filter(
-                        item => item.type !== "folders"
-                      );
-                      const songsOrdered = songs
-                        .slice(i)
-                        .concat(songs.slice(0, i));
-                      setSongQueue(songsOrdered);
-                    }}
-                    {...item}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          <Box
+            py={3}
+            css={`
+              max-height: 100%;
+              overflow: auto;
+            `}
+          >
+            {data.items.sort(byTitle).map((item, i) =>
+              item.type === 'folders' ? (
+                <Folder {...item} key={item.id} />
+              ) : (
+                <Song
+                  key={item.id}
+                  onClick={() => {
+                    const songs = data.items.filter(
+                      item => item.type !== 'folders'
+                    );
+                    const songsOrdered = songs
+                      .slice(i)
+                      .concat(songs.slice(0, i));
+                    setSongQueue(songsOrdered);
+                  }}
+                  {...item}
+                />
+              )
+            )}
+          </Box>
         );
       }}
     </Query>

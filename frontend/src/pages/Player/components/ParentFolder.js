@@ -1,7 +1,8 @@
-import React from "react";
-import { Query } from "react-apollo";
-import gql from "graphql-tag";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Query } from 'react-apollo';
+import gql from 'graphql-tag';
+import { Link } from 'react-router-dom';
+import { Flex, Box, Text } from 'rebass';
 
 const FETCH_ITEM = gql`
   query FETCH_ITEM($id: String) {
@@ -20,8 +21,18 @@ const ParentFolder = ({ id }) => {
         if (loading) return <div>loading</div>;
         if (!data || !data.item) return <div />;
         return (
-          <Link to={`/player/${data.item.parentId}`}>
-            {`<`} {data.item.title}
+          <Link
+            to={`/player/${data.item.parentId}`}
+            css={`
+              text-decoration: none;
+            `}
+          >
+            <Flex p={2} color="primary" fontSize={3}>
+              <Box mr={3}>
+                <i className="fas fa-chevron-left" />
+              </Box>
+              <Text fontWeight="bold">{data.item.title}</Text>
+            </Flex>
           </Link>
         );
       }}

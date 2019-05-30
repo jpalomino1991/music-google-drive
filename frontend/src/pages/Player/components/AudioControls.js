@@ -1,8 +1,10 @@
 import React from 'react';
-import { Flex, Box } from 'rebass';
+import { Flex, Box, Text } from 'rebass';
 
 import useMusicPlayer from '../../../hooks/useMusicPlayer';
-import { IconButton } from '../../../components';
+
+const formatTime = (time = 0) =>
+  `${Math.round(time / 60)}:${Math.round(time % 60)}`;
 
 const AudioControls = () => {
   const [track, audio, controls] = useMusicPlayer();
@@ -14,48 +16,87 @@ const AudioControls = () => {
   if (!track) return null;
 
   return (
-    <Flex flexDirection="column" pt={4}>
-      <div>
-        {track.title}- {audio.currentTime} - {audio.duration}
-      </div>
+    <Flex
+      color="white"
+      py={3}
+      px={4}
+      css={`
+        border-top: 1px solid white;
+      `}
+      alignItems="center"
+    >
+      <Box
+        css={`
+          border-radius: 5px;
+          width: 30px;
+          height: 30px;
+        `}
+        bg="#56517e"
+        mr={3}
+      />
+      <Text fontWeight="bold" width="200px">
+        {track.title}
+      </Text>
 
-      <Box width="100px" style={{ height: '5px' }} bg="gray">
+      <Flex justifyContent="center" alignItems="center" mx={3}>
+        <Box mx={2} onClick={controls.suffle}>
+          <i className="fas fa-random" />
+        </Box>
+        <Box mx={2} onClick={controls.previousSong}>
+          <i className="fas fa-backward" />
+        </Box>
         <Box
-          bg="magenta"
-          width={`${percentagePlayed}%`}
-          style={{ height: '100%' }}
-        />
-      </Box>
-      <Flex justifyContent="center" alignItems="center" pt={3}>
-        <IconButton name="random" mx={3} onClick={controls.suffle} />
-        <IconButton name="backward" mx={3} onClick={controls.previousSong} />
-        <IconButton
-          name={audio.isPlaying ? 'pause' : 'play'}
-          mx={3}
-          fontSize={5}
+          mx={2}
+          fontSize={3}
           onClick={audio.isPlaying ? controls.pause : controls.play}
-        />
-        <IconButton name="forward" mx={3} onClick={() => controls.nextSong()} />
-        <IconButton
-          style={{ position: 'relative' }}
-          name="redo"
-          mx={3}
+        >
+          <i className={`fas fa-${audio.isPlaying ? 'pause' : 'play'}`} />
+        </Box>
+        <Box mx={2} onClick={() => controls.nextSong()}>
+          <i className="fas fa-forward" />
+        </Box>
+        <Box
+          css={`
+            position: relative;
+            border-radius: 3px;
+          `}
+          mx={2}
           onClick={controls.changeRepeatStatus}
         >
+          <i className="fas fa-redo" />
           {track.repeat === 'ONE' && (
             <div
-              style={{
-                position: 'absolute',
-                color: 'white',
-                top: '20%',
-                right: '5px',
-              }}
+              css={`
+                font-size: 12px;
+                position: absolute;
+                color: white;
+                top: 20%;
+                right: -9px;
+              `}
             >
               1
             </div>
           )}
-        </IconButton>
+        </Box>
       </Flex>
+      <Text color="primary">{formatTime(audio.currentTime)}</Text>
+      <Flex
+        mx={2}
+        flex="1"
+        css={`
+          border-radius: 5px;
+          overflow: hidden;
+          height: 5px;
+        `}
+        bg="gray"
+      >
+        <Box
+          bg="primary"
+          width={`${percentagePlayed}%`}
+          style={{ height: '100%' }}
+        />
+      </Flex>
+      <Text>{formatTime(audio.duration)}</Text>
     </Flex>
   );
 };

@@ -1,28 +1,46 @@
-import React, { Component } from "react";
-import { Switch, Route } from "react-router-dom";
-import Loadable from "react-loadable";
+import React, { Component } from 'react';
+import styled, { createGlobalStyle } from 'styled-components';
+import { Switch, Route } from 'react-router-dom';
+import Loadable from 'react-loadable';
 
-import { PrivateRoute } from "./components";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
+import { PrivateRoute } from './components';
+import Login from './pages/Login';
+import Home from './pages/Home';
+
+const Container = styled.div`
+  height: 100vh;
+  background: ${props => props.theme.colors.background};
+`;
+
+const GlobalStyle = createGlobalStyle`
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Muli', sans-serif;
+  }
+  * {
+    box-sizing: border-box;
+  }
+`;
 
 const Loading = () => <div> Loading ...</div>;
 
 const Player = Loadable({
-  loader: () => import("./pages/Player"),
-  loading: Loading
+  loader: () => import('./pages/Player'),
+  loading: Loading,
 });
 
 class App extends Component {
   render() {
     return (
-      <div>
+      <Container>
+        <GlobalStyle />
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
           <PrivateRoute path="/player/:id" component={Player} />
           <Route path="/login" component={Login} />
         </Switch>
-      </div>
+      </Container>
     );
   }
 }
