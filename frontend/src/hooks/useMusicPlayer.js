@@ -1,8 +1,8 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from 'react';
 
-import { useMusicQueue } from "./musicQueueContext";
-import useAudioURL from "./useAudioURL";
-import useAudio from "./useAudio";
+import { useMusicQueue } from './musicQueueContext';
+import useAudioURL from './useAudioURL';
+import useAudio from './useAudio';
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -26,11 +26,15 @@ const suffleArray = arr => {
 const useMusicPlayer = () => {
   const { songQueue, setSongQueue } = useMusicQueue();
   const [state, setState] = useState({
-    repeat: "ALL",
-    currentIndex: 0
+    repeat: 'ALL',
+    currentIndex: 0,
   });
 
-  const repeatRef = useRef("ALL");
+  const repeatRef = useRef('ALL');
+
+  useEffect(() => {
+    setState({ currentIndex: 0 });
+  }, [songQueue]);
 
   useEffect(() => {
     repeatRef.current = state.repeat;
@@ -42,7 +46,7 @@ const useMusicPlayer = () => {
   const song = songQueue[state.currentIndex];
   const [url] = useAudioURL(song && song.link);
   const [audio, setAudio, audioControls] = useAudio(url, {
-    onEnded: () => nextQueueSong()
+    onEnded: () => nextQueueSong(),
   });
 
   const suffle = () => {
@@ -57,24 +61,24 @@ const useMusicPlayer = () => {
     setState(prevState => {
       let nextRepeatState;
       switch (prevState.repeat) {
-        case "NONE":
-          nextRepeatState = "ALL";
+        case 'NONE':
+          nextRepeatState = 'ALL';
           break;
-        case "ALL":
-          nextRepeatState = "ONE";
+        case 'ALL':
+          nextRepeatState = 'ONE';
           break;
         default:
-          nextRepeatState = "NONE";
+          nextRepeatState = 'NONE';
       }
-      console.log("next", nextRepeatState);
+      console.log('next', nextRepeatState);
       return {
         ...prevState,
-        repeat: nextRepeatState
+        repeat: nextRepeatState,
       };
     });
 
   const nextQueueSong = () => {
-    if (repeatRef.current === "ONE") {
+    if (repeatRef.current === 'ONE') {
       audioControls.seek(0);
       return audioControls.play();
     }
@@ -91,14 +95,14 @@ const useMusicPlayer = () => {
     }
     setState(state => ({
       ...state,
-      currentIndex: nextIndex
+      currentIndex: nextIndex,
     }));
     setAudio(state => ({
       ...state,
       duration: false,
       loaded: false,
       currentTime: 0,
-      isPlaying: false
+      isPlaying: false,
     }));
   };
 
@@ -112,7 +116,7 @@ const useMusicPlayer = () => {
     nextSong,
     nextQueueSong,
     suffle,
-    changeRepeatStatus
+    changeRepeatStatus,
   };
 
   return [{ ...song, ...state }, audio, { ...audioControls, ...controls }];
