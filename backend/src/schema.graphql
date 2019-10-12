@@ -17,6 +17,7 @@ type Item {
 
 type Query {
   me: User
+  searchSong(query: String): [Item]
   folders: [MusicFolder!]
   items(parentId: String): [Item!]
   item(id: String): Item

@@ -37,7 +37,7 @@ class App extends Component {
         <GlobalStyle />
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
-          <PrivateRoute path="/player/:id" component={Player} />
+          <PrivateRoute path="/player" component={Player} />
           <Route path="/login" component={Login} />
         </Switch>
       </Container>

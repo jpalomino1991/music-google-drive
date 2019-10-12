@@ -21,6 +21,7 @@
   "dependencies": {
     "aws-sdk": "^2.464.0",
     "bluebird": "^3.5.3",
+    "bull": "^3.9.1",
     "cookie-parser": "^1.4.3",
     "dotenv": "^6.2.0",
     "elasticsearch": "^15.3.0",

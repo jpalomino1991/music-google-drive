@@ -1,32 +1,47 @@
 import React from 'react';
+import { Link, Route } from 'react-router-dom';
 import { Flex, Text, Box } from 'rebass';
 
-const Item = ({ selected, text, icon }) => (
-  <Flex
-    color={selected ? 'primary' : 'gray'}
-    py={3}
-    px={4}
-    css={`
-      cursor: pointer;
-      &:hover {
-        background-color: #172036;
-      }
-    `}
-  >
-    <Box mr={3}>
-      <i className={`fas fa-${icon}`} />
-    </Box>
-    <Text fontWeight={selected ? 'bold' : 'normal'}>{text}</Text>
-  </Flex>
+const CustomLink = ({ to, text, icon }) => (
+  <Route
+    to={to}
+    render={props => {
+      const match = props.location.pathname.indexOf(to) > -1;
+      return (
+        <Box
+          css={`
+            &:hover {
+              background-color: #172036;
+            }
+            a {
+              text-decoration: none;
+              color: inherit;
+            }
+          `}
+        >
+          <Link to={to}>
+            <Flex color={match ? 'primary' : 'gray'} py={3} px={4}>
+              <Box mr={3}>
+                <i className={`fas fa-${icon}`} />
+              </Box>
+              <Text fontWeight={match ? 'bold' : 'normal'} css={``}>
+                {text}
+              </Text>
+            </Flex>
+          </Link>
+        </Box>
+      );
+    }}
+  />
 );
 
 const SideBar = () => {
   return (
     <Flex flexDirection="column" flex="1" bg="black.0" width={1 / 4} py={4}>
-      <Item icon="folder" text="Folders" selected />
-      <Item icon="music" text="Songs" />
-      <Item icon="music" text="Albums" />
-      <Item icon="users" text="Artists" />
+      <CustomLink to="/player/folders" icon="folder" text="Folders" />
+      <CustomLink to="/player/songs" icon="music" text="Songs" />
+      <CustomLink to="/player/album" icon="music" text="Albums" />
+      <CustomLink to="/player/artist" icon="users" text="Artists" />
     </Flex>
   );
 };

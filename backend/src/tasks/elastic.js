@@ -84,7 +84,7 @@ const createIndexIfNotExists = async index => {
   }
 };
 
-const parseItem = ({ _index: type, _id: id, _source }) => ({
+const parseItem = ({ _index: type, _source }) => ({
   type,
   id: _source.driveId,
   ..._source,
@@ -147,15 +147,83 @@ module.exports.getChildren = async (parentId, providerId) => {
   return R.map(parseItem)(response.hits.hits);
 };
 
+const clearElastic = () =>
+  client.indices.delete({
+    index: '_all',
+  });
+
+module.exports.bulkUpdateSongs = songs =>
+  client.bulk({
+    body: R.compose(
+      R.flatten,
+      R.map(({ _id, tags = {} }) => [
+        {
+          update: {
+            _index: 'songs',
+            _type: '_doc',
+            _id,
+          },
+        },
+        {
+          doc: tags,
+        },
+      ])
+    )(songs),
+  });
+
+const query = () =>
+  client.search({
+    index: 'songs',
+    body: {
+      query: {
+        multi_match: {
+          query: 'bayb',
+          fields: ['artist', 'title'],
+          fuzziness: 2,
+        },
+      },
+    },
+  });
+
+const querySongs = async (field, value, providerId) => {
+  const response = await client.search({
+    index: 'songs',
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              match: {
+                providerId,
+              },
+            },
+            {
+              fuzzy: {
+                [field]: value,
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  return R.map(parseItem)(response.hits.hits);
+};
+
+module.exports.queryByArtist = (providerId, artist) =>
+  querySongs('artist', artist, providerId);
+module.exports.queryByTitle = (providerId, title) =>
+  querySongs('title', title, providerId);
+module.exports.queryByAlbum = (providerId, album) =>
+  querySongs('album', album, providerId);
+
 module.exports.setup = async () => {
   /*
-  await client.indices.delete({
-    index: '_all'
-  });
+  await clearElastic();
   console.log('deleted');
   return;
-
-   */
+	*/
 
   try {
     await createIndexIfNotExists('songs');

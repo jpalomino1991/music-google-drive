@@ -1,18 +1,16 @@
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { Flex } from 'rebass';
 
+import Songs from './Songs';
+import RootFolder from './RootFolder';
+import Folders from './Folders';
 import SideBar from './components/SideBar';
-import ParentFolder from './components/ParentFolder';
-import Items from './components/Items';
 import AudioControls from './components/AudioControls';
 
-const Player = ({
-  match: {
-    params: { id },
-  },
-}) => {
-  if (!id) return <Redirect to="/" />;
+const Comp = () => <div>hi</div>;
+
+const Player = ({ match: { path } }) => {
   return (
     <Flex
       flexDirection="column"
@@ -31,8 +29,10 @@ const Player = ({
             height: 100%;
           `}
         >
-          <ParentFolder id={id} />
-          <Items id={id} />
+          <Route exact path={`${path}/folders`} component={RootFolder} />
+          <Route path={`${path}/folders/:id`} component={Folders} />
+          <Route path={`${path}/songs`} component={Songs} />
+          <Route path={`${path}/artist`} component={Comp} />
         </Flex>
       </Flex>
       <AudioControls />

@@ -1,9 +1,10 @@
-import React from "react";
-import { Query } from "react-apollo";
-import gql from "graphql-tag";
-import { Redirect } from "react-router-dom";
+import React from 'react';
+import { Query } from 'react-apollo';
+import gql from 'graphql-tag';
+import { Redirect } from 'react-router-dom';
+import { Flex } from 'rebass';
 
-import FolderPicker from "./components/FolderPicker";
+import FolderPicker from './components/FolderPicker';
 
 const FETCH_FOLDERS = gql`
   query {
@@ -18,19 +19,25 @@ const FETCH_FOLDERS = gql`
   }
 `;
 
+const isReadyToPlay = status =>
+  ['STARTING', 'FETCHING_DRIVE'].indexOf(status) === -1;
+
 const Home = props => {
   return (
     <Query query={FETCH_FOLDERS}>
       {({ loading, data }) => {
-        if (loading) return <div>loading</div>;
+        if (loading)
+          return (
+            <Flex color="text" alignItems="center">
+              loading
+            </Flex>
+          );
         if (!data.folders.length) return <FolderPicker />;
         const folder = data.folders[0];
-        const hasFolderBeingUploaded =
-          folder.states[0].status === "SONGS_UPLOADED";
-        if (hasFolderBeingUploaded) {
-          return <Redirect to={`/player/${folder.folderId}`} />;
+        if (isReadyToPlay(folder.states[0].status)) {
+          return <Redirect to="/player/folders" />;
         }
-        return <div>wait {folder.name} is loading</div>;
+        return <Flex color="text">wait {folder.name} is loading</Flex>;
       }}
     </Query>
   );

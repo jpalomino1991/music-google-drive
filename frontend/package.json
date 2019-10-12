@@ -23,7 +23,8 @@
     "react-scripts": "2.1.8",
     "rebass": "^3.1.0",
     "styled-components": "^4.2.0",
-    "unstated-next": "^1.1.0"
+    "unstated-next": "^1.1.0",
+    "use-debounce": "^2.2.0"
   },
   "devDependencies": {
     "babel-plugin-styled-components": "^1.10.0",

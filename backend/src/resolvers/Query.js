@@ -55,6 +55,17 @@ const Query = {
     if (!userId) throw new Error('You must be signin.');
     return elastic.getChildren(args.parentId, providerId);
   },
+  searchSong(
+    parent,
+    { query },
+    {
+      request: { userId, providerId },
+    }
+  ) {
+    if (!userId) throw new Error('You must be signin.');
+    console.log(query);
+    return elastic.queryByTitle(providerId, query);
+  },
 };
 
 module.exports = Query;

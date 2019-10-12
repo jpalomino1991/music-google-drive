@@ -1,11 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { Flex, Box, Text } from 'rebass';
 
-const Folder = ({ id, title }) => {
+const generateNestedPath = (path, id) => path.replace('/:id', '') + '/' + id;
+
+const Folder = ({ id, title, match }) => {
   return (
     <Link
-      to={`/player/${id}`}
+      to={generateNestedPath(match.path, id)}
       css={`
         text-decoration: none;
       `}
@@ -30,4 +32,4 @@ const Folder = ({ id, title }) => {
   );
 };
 
-export default Folder;
+export default withRouter(Folder);

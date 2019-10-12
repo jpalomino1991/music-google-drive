@@ -26,12 +26,12 @@ module.exports.createClient = async refreshToken => {
   return drive;
 };
 
-module.exports.createPartialFile = async ({ driveClient, fileId, path }) => {
+const getFile = async ({ driveClient, fileId, path, headers = {} }) => {
   const dest = fs.createWriteStream(path);
   return new Promise((resolve, reject) => {
     driveClient.files.get(
       {
-        headers: { Range: 'bytes=0-8192' },
+        headers,
         fileId,
         alt: 'media',
       },
@@ -60,6 +60,10 @@ module.exports.createPartialFile = async ({ driveClient, fileId, path }) => {
 };
 
 const isType = matchType => type => type.indexOf(matchType) > -1;
+
+module.exports.createFullFile = getFile;
+module.exports.createPartialFile = ({ driveClient, fileId, path }) =>
+  getFile({ driveClient, fileId, path, headers: { Range: 'bytes=0-8192' } });
 
 module.exports.isFolder = ({ mimeType }) => isType('folder')(mimeType);
 

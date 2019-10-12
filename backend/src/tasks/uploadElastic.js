@@ -1,6 +1,7 @@
 const LineReader = require('line-by-line');
 const Promise = require('bluebird');
 
+const fileWriteStream = require('./fileWriteStream');
 const elastic = require('./elastic');
 const db = require('../db');
 
@@ -11,10 +12,10 @@ const createState = ({ extraData, status, folderId }) =>
       extraData,
       folder: {
         connect: {
-          id: folderId
-        }
-      }
-    }
+          id: folderId,
+        },
+      },
+    },
   });
 
 const getLines = async ({ blockSize, filePath, callback }) => {
@@ -44,37 +45,50 @@ const uploadElastic = async ({
   counts,
   providerId,
   folderId,
-  folderDriveId
+  folderDriveId,
 }) => {
   const uploadingNewState = await createState({
     extraData: {
       files: 0,
-      folders: 0
+      folders: 0,
     },
     status: 'UPLOADING_ELASTIC',
-    folderId
+    folderId,
   });
+
+  const uploadSongStream = fileWriteStream(
+    `./src/temp/uploaded_elastic_songs_${folderDriveId}_${providerId}`
+  );
 
   await getLines({
     blockSize: 100,
-    filePath: `./src/temp/songs_${folderDriveId}`,
-    callback: songs => {
-      elastic.bulkUploadSongs(songs.map(JSON.parse), providerId);
-    }
+    filePath: `./src/temp/songs_${folderDriveId}_${providerId}`,
+    callback: async songs => {
+      const songsParsed = songs.map(JSON.parse);
+      const response = await elastic.bulkUploadSongs(songsParsed, providerId);
+      response.items.forEach((item, i) => {
+        uploadSongStream.write({
+          _id: item.index._id,
+          ...songsParsed[i],
+        });
+      });
+    },
   });
+
+  uploadSongStream.end();
 
   await getLines({
     blockSize: 100,
-    filePath: `./src/temp/folders_${folderDriveId}`,
+    filePath: `./src/temp/folders_${folderDriveId}_${providerId}`,
     callback: folders => {
       elastic.bulkUploadFolders(folders.map(JSON.parse), providerId);
-    }
+    },
   });
 
   return await createState({
     extraData: counts,
     status: 'SONGS_UPLOADED',
-    folderId
+    folderId,
   });
 };
 

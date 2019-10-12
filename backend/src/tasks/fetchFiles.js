@@ -16,13 +16,13 @@ const fetchDrive = async (
   const { token, items = [] } = await drive.fetchFolderContent({
     driveClient,
     parentId: id,
-    pageToken
+    pageToken,
   });
   if (token) {
     return await fetchDrive(
       {
         songsStream,
-        foldersStream
+        foldersStream,
       },
       driveClient,
       id,
@@ -37,7 +37,7 @@ const fetchDrive = async (
       return await fetchDrive(
         {
           songsStream,
-          foldersStream
+          foldersStream,
         },
         driveClient,
         item.id
@@ -48,23 +48,32 @@ const fetchDrive = async (
   });
 };
 
-module.exports = async ({ driveClient, folderDriveId, folderId }) => {
-  const songsStream = fileWriteStream(`./src/temp/songs_${folderDriveId}`);
-  const foldersStream = fileWriteStream(`./src/temp/folders_${folderDriveId}`);
+module.exports = async ({
+  providerId,
+  driveClient,
+  folderDriveId,
+  folderId,
+}) => {
+  const songsStream = fileWriteStream(
+    `./src/temp/songs_${folderDriveId}_${providerId}`
+  );
+  const foldersStream = fileWriteStream(
+    `./src/temp/folders_${folderDriveId}_${providerId}`
+  );
   const newState = await db.mutation.createState({
     data: {
       status: 'FETCHING_DRIVE',
       folder: {
         connect: {
-          id: folderId
-        }
-      }
-    }
+          id: folderId,
+        },
+      },
+    },
   });
   await fetchDrive(
     {
       songsStream,
-      foldersStream
+      foldersStream,
     },
     driveClient,
     folderDriveId
@@ -73,15 +82,15 @@ module.exports = async ({ driveClient, folderDriveId, folderId }) => {
   foldersStream.end();
   const counts = {
     folders: foldersStream.lines(),
-    files: songsStream.lines()
+    files: songsStream.lines(),
   };
   await db.mutation.updateState({
     data: {
-      extraData: counts
+      extraData: counts,
     },
     where: {
-      id: newState.id
-    }
+      id: newState.id,
+    },
   });
   return counts;
 };

@@ -1,25 +1,28 @@
-const util = require('util');
 const nodeID3 = require('node-id3');
 const musicMetadata = require('music-metadata');
 const R = require('ramda');
 
-const nodeID3Promise = util.promisify(nodeID3.read.bind(nodeID3));
+const nodeID3Promise = path =>
+  new Promise((resolve, reject) => {
+    nodeID3.read(path, (err, tags) => {
+      if (err) return reject(err);
+      if (typeof tags === 'boolean') return resolve({});
+      resolve(tags);
+    });
+  });
 
-const keys = ['title', 'artist', 'album', 'year', 'genre'];
-const defaults = {
-  title: undefined,
-  artist: undefined,
-  album: undefined,
-  year: undefined,
-  genre: undefined,
-  image: undefined
-};
+const keys = [
+  'title',
+  'artist',
+  'album',
+  'year',
+  'genre',
+  'trackNumber',
+  'contentGroup',
+];
 
 const extractMedata = async ({ path, song }) => {
-  const formatMetadata = R.compose(
-    R.merge({ ...defaults, title: song.name }),
-    R.pick(keys)
-  );
+  const extractKeys = R.pick(keys);
   if (song.fileExtension.toLowerCase() === 'mp3') {
     //sample output
     //{album: 'DRAG-ON DRAGOON 3 Original Soundtrack',
@@ -35,7 +38,8 @@ const extractMedata = async ({ path, song }) => {
     //{ mime: 'jpeg',
     //type: { id: 3, name: 'front cover' },
     //description: undefined,}, ...more }
-    return formatMetadata(await nodeID3Promise(path));
+    //console.log(await nodeID3Promise(path));
+    return extractKeys(await nodeID3Promise(path));
   }
   //sample output
   //{common:
@@ -50,7 +54,7 @@ const extractMedata = async ({ path, song }) => {
   //composer: [ 'Keigo Hoashi' ],
   //picture: [ [Object] ] } },...more }
   const rawMedatata = await musicMetadata.parseFile(path, { native: true });
-  return formatMetadata(R.prop('common')(rawMedatata));
+  return extractKeys(R.prop('common')(rawMedatata));
 };
 
 module.exports = extractMedata;

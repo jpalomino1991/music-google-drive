@@ -1,7 +1,7 @@
 import React from 'react';
 import { Query } from 'react-apollo';
 import gql from 'graphql-tag';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { Flex, Box, Text } from 'rebass';
 
 const FETCH_ITEM = gql`
@@ -14,7 +14,9 @@ const FETCH_ITEM = gql`
   }
 `;
 
-const ParentFolder = ({ id }) => {
+const generateNestedPath = (path, id) => path.replace('/:id', '') + '/' + id;
+
+const ParentFolder = ({ id, match }) => {
   return (
     <Query query={FETCH_ITEM} variables={{ id }}>
       {({ loading, data }) => {
@@ -22,7 +24,7 @@ const ParentFolder = ({ id }) => {
         if (!data || !data.item) return <div />;
         return (
           <Link
-            to={`/player/${data.item.parentId}`}
+            to={generateNestedPath(match.path, data.item.parentId)}
             css={`
               text-decoration: none;
             `}
@@ -40,4 +42,4 @@ const ParentFolder = ({ id }) => {
   );
 };
 
-export default ParentFolder;
+export default withRouter(ParentFolder);

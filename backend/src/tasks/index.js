@@ -1,8 +1,31 @@
+const LineReader = require('line-by-line');
+
 const db = require('../db');
 const drive = require('./drive');
 const fetchFiles = require('./fetchFiles');
 const uploadElastic = require('./uploadElastic');
-//const processMetadata = require('./processMetadata');
+const processMetadata = require('./processMetadata');
+const queue = require('./queue');
+
+const gg = async () => {
+  console.log('hi');
+  const folderDriveId = '13ov24loNOhJTgLdeobhJUbQn9hw-dGzg';
+  const refreshToken = '1/op04JK9buqUQPJQdgstxUAsQiwAGBEaAbZcEgRuZYWY';
+  //const lineReader = new LineReader(`./src/temp/songs_${folderDriveId}`);
+  const lineReader = new LineReader(`./src/temp/ggwp`);
+
+  let lineCount = 0;
+  console.time('PROCESS');
+  lineReader.on('line', async line => {
+    queue.add({ song: JSON.parse(line), refreshToken, folderDriveId });
+    lineCount++;
+  });
+  lineReader.on('end', () => {
+    console.log('END LINES PROCESSED', lineCount);
+  });
+};
+
+//gg();
 
 module.exports = async ({
   providerId,
@@ -13,6 +36,7 @@ module.exports = async ({
   try {
     console.time('fetch drive');
     const counts = await fetchFiles({
+      providerId,
       driveClient: await drive.createClient(refreshToken),
       folderId,
       folderDriveId,
@@ -37,15 +61,13 @@ module.exports = async ({
       counts,
     });
     console.timeEnd('upload elastic');
-    /*
     await processMetadata({
       providerId,
       refreshToken,
       folderId,
       folderDriveId,
-      counts
+      counts,
     });
-    */
   } catch (e) {
     console.log('err', e);
   }
